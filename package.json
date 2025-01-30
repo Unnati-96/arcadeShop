@@ -1,0 +1,26 @@
+{
+  "name": "arcadeshop",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Unnati-96/arcadeShop.git"
+  },
+  "author": "Unnati, Shashi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Unnati-96/arcadeShop/issues"
+  },
+  "homepage": "https://github.com/Unnati-96/arcadeShop#readme",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5",
+    "nodemon": "^3.1.9"
+  }
+}
