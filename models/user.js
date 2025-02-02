@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
+    _id:{
+        type:mongoose.Schema.Types.ObjectId
+    },
     name:{
         type:String,
         required:true
@@ -8,7 +11,8 @@ const userSchema = new mongoose.Schema({
     {
         type:String,
         required:true,
-        unique:true
+        unique:true,
+        match: [/^\S+@\S+\.\S+$/]
     },
     phoneNo:
     {
@@ -26,10 +30,9 @@ const userSchema = new mongoose.Schema({
     password:
     {
         type:String,
-        unique:true,
         required:true
     }
 },{timestamps:true});
 
-const userModel = mongoose.model("user",userSchema);
-export default userModel;
+const user = mongoose.model("user",userSchema);
+export default user;
