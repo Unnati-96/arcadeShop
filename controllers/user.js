@@ -75,16 +75,16 @@ export const delUser = async (req,res,next)=>{
 
 export const searchUser = async (req,res,next)=>{
     const {name,email,phoneNo} = req.query;
-    const filter = {};
+    let filter = {};
     if(name && name.trim() !== "")
     {
-        filter.name = name;
+        filter.name = {$regex:name,$options:"i"};
     }
     
     if(email && email.trim() !== "")
     {
 
-        filter.email = email;
+        filter.email = {$regex:email,$options:"i"};
     }
     
     if(phoneNo && phoneNo.trim() !== "")
