@@ -15,7 +15,7 @@ export const addDevice = async (req,res,next)=>{
 export const getDevices = async (req,res,next)=>{
     try {
          const data = await device.find({});
-         res.status(200).json(data); 
+      return res.status(200).json(data); 
     } catch (error) {
         next(error);
     }
