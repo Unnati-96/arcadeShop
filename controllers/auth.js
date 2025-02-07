@@ -29,11 +29,16 @@ export const signinUser = async (req,res,next) =>{
         {
           return next(errorHandler(404,"User not found!!"));    
         }
-        const validPassword = bcryptjs.compareSync(password,validUser.password);
-        if(!validPassword)
-        {
-           return next(errorHandler(401,"Wrong Credentials!!"));
+
+        if(role!== "Admin")
+        {  
+            const validPassword = bcryptjs.compareSync(password,validUser.password);
+            if(!validPassword)
+            {
+               return next(errorHandler(401,"Wrong Credentials!!"));
+            }
         }
+        
         if(role !== validUser.role)
         {
             return next(errorHandler(404,"Unauthorised,SignIn as Guest!!"));

@@ -16,11 +16,13 @@ import deldeviceRouter from "./routes/device.js";
 import searchdeviceRouter from "./routes/device.js";
 import cookieParser from "cookie-parser";
 import createbookingRouter from "./routes/booking.js";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 const port = process.env.PORT || 5000;
 
 app.listen(port,()=>{
