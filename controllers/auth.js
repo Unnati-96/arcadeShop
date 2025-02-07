@@ -22,7 +22,7 @@ export const signupUser = async (req,res,next)=>{
 }
 
 export const signinUser = async (req,res,next) =>{
-    const {email,password} = req.body;
+    const {email,password,role} = req.body;
     try {
         const validUser = await user.findOne({email});
         if(!validUser)
@@ -33,6 +33,10 @@ export const signinUser = async (req,res,next) =>{
         if(!validPassword)
         {
            return next(errorHandler(401,"Wrong Credentials!!"));
+        }
+        if(role !== validUser.role)
+        {
+            return next(errorHandler(404,"Unauthorised,SignIn as Guest!!"));
         }
      const token = jwt.sign({id:validUser._id},process.env.SECRET_KEY);
      const {password:pass,...rest} = validUser._doc;

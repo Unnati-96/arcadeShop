@@ -1,22 +1,27 @@
 import mongoose from "mongoose";
 
 const deviceSchema = new mongoose.Schema({
-    name:
+    systemId:
     {
         type:String,
         required:true,
+        unique:true
+    },
+    deviceType:{
+        type:String,
+        required:true
     },
     description:
     {
         type:String,
         required:false
     },
-    pricePrHr :
+    pricePerHour :
     {
         type:Number,
         required:true
     },
-    status:
+    isAvailable:
     {
         type:Boolean,
         required:true

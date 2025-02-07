@@ -7,7 +7,7 @@ export const addUser =  async (req,res,next)=>{
     try {
     const data = await user.create(req.body);
     console.log(data);
-    res.status(201).json("User created successfully!!");    
+    res.status(201).json({message:"User created successfully!!",userId:data._id});    
     } catch (error) {
        next(error); 
     }
@@ -32,7 +32,7 @@ export const updateUser = async (req,res,next)=>{
             phoneNo:req.body.phoneNo,
             role:req.body.role,
             password:req.body.password
-        });
+        },{new:true});
         if(!data)
         {
             return next(errorHandler(404,"User not found!!"))

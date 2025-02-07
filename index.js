@@ -4,7 +4,6 @@ import { mongoDB } from "./config/mongo.js";
 import signupRouter from "./routes/auth.js";
 import signinRouter from "./routes/auth.js";
 import signoutRouter from "./routes/auth.js";
-
 import adduserRouter from "./routes/user.js";
 import getuserRouter from "./routes/user.js";
 import updateuserRouter from "./routes/user.js";
@@ -16,6 +15,7 @@ import updatedeviceRouter from "./routes/device.js";
 import deldeviceRouter from "./routes/device.js";
 import searchdeviceRouter from "./routes/device.js";
 import cookieParser from "cookie-parser";
+import createbookingRouter from "./routes/booking.js";
 
 dotenv.config();
 const app = express();
@@ -44,6 +44,7 @@ app.use("/arcade/device",updatedeviceRouter);
 app.use("/arcade/device",deldeviceRouter);
 app.use("/arcade/device",searchdeviceRouter);
 
+app.use("/arcade/booking",createbookingRouter);
 
 app.use((err,req,res,next)=>{
     const statusCode = err.statusCode || 500;
