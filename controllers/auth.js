@@ -30,7 +30,7 @@ export const signinUser = async (req,res,next) =>{
           return next(errorHandler(404,"User not found!!"));    
         }
 
-        if(role!== "Admin")
+        if(role=== "Guest")
         {  
             const validPassword = bcryptjs.compareSync(password,validUser.password);
             if(!validPassword)

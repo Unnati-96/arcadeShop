@@ -5,12 +5,12 @@ import signupRouter from "./routes/auth.js";
 import signinRouter from "./routes/auth.js";
 import signoutRouter from "./routes/auth.js";
 import adduserRouter from "./routes/user.js";
-import getuserRouter from "./routes/user.js";
+// import getuserRouter from "./routes/user.js";
 import updateuserRouter from "./routes/user.js";
 import deluserRouter from "./routes/user.js";
 import searchuserRouter from "./routes/user.js";
 import adddeviceRouter from "./routes/device.js";
-import getdeviceRouter from "./routes/device.js";
+// import getdeviceRouter from "./routes/device.js";
 import updatedeviceRouter from "./routes/device.js";
 import deldeviceRouter from "./routes/device.js";
 import searchdeviceRouter from "./routes/device.js";
@@ -35,13 +35,13 @@ app.use("/arcade/auth",signinRouter);
 app.use("/arcade/auth",signoutRouter)
 
 app.use("/arcade/user",adduserRouter);
-app.use("/arcade/user",getuserRouter);
+// app.use("/arcade/user",getuserRouter);
 app.use("/arcade/user",updateuserRouter);
 app.use("/arcade/user",deluserRouter);
 app.use("/arcade/user",searchuserRouter);
 
 app.use("/arcade/device",adddeviceRouter);
-app.use("/arcade/device",getdeviceRouter);
+// app.use("/arcade/device",getdeviceRouter);
 app.use("/arcade/device",updatedeviceRouter);
 app.use("/arcade/device",deldeviceRouter);
 app.use("/arcade/device",searchdeviceRouter);

@@ -13,15 +13,15 @@ export const addUser =  async (req,res,next)=>{
     }
 }
 
-export const getUser = async (req,res,next)=>{ 
-    try {
-       const data = await user.find({});
-       console.log(data);
-       res.status(200).json(data);
-    } catch (error) {
-        next(error);
-    }
-}
+// export const getUser = async (req,res,next)=>{ 
+//     try {
+//        const data = await user.find({});
+//        console.log(data);
+//        res.status(200).json(data);
+//     } catch (error) {
+//         next(error);
+//     }
+// }
 
 export const updateUser = async (req,res,next)=>{
     const id = req.params.id;
@@ -83,10 +83,10 @@ export const searchUser = async (req,res,next)=>{
         filter.phoneNo= num;
     }
    
-    if(Object.keys(filter).length === 0)
-    {
-    return next(errorHandler(400,"Bad Request,please provide user information!"))
-    }
+    // if(Object.keys(filter).length === 0)
+    // {
+    // return next(errorHandler(400,"Bad Request,please provide user information!"))
+    // }
     try {
      const data = await user.find(filter);
      if(data.length ===0)

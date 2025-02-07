@@ -12,14 +12,14 @@ export const addDevice = async (req,res,next)=>{
     }
 }
 
-export const getDevices = async (req,res,next)=>{
-    try {
-         const data = await device.find({});
-      return res.status(200).json(data); 
-    } catch (error) {
-        next(error);
-    }
-}
+// export const getDevices = async (req,res,next)=>{
+//     try {
+//          const data = await device.find({});
+//       return res.status(200).json(data); 
+//     } catch (error) {
+//         next(error);
+//     }
+// }
 
 export const updateDevice = async (req,res,next)=>{
   const id = req.params.id;
@@ -53,26 +53,23 @@ export const delDevice = async (req,res,next)=>{
 }
 
 export const searchDevice = async (req,res,next)=>{
-    const {name,id} = req.query;
+    const {deviceType,systemId} = req.query;
     let filter = {};
-    if(name && name.trim() !== "")
+    if(deviceType && deviceType.trim() !== "")
     {
-        filter.name= {$regex:name,$options:"i"}
+        filter.deviceType= {$regex:deviceType,$options:"i"}
     }
-    if(id && id.trim() !== "")
+    if(systemId&& systemId.trim() !== "")
     {
-        if(mongoose.Types.ObjectId.isValid(id))
-        {
-            filter._id = id;
-        }
-        else{
-            return next(errorHandler(200,"Invalid Id!!"));
-        }
+       
+            filter.systemId = systemId;
     }
-    if(Object.keys(filter).length === 0)
-    {
-        return next(errorHandler(400,"Please apply the filter!!"));
-    }
+       
+    
+    // if(Object.keys(filter).length === 0)
+    // {
+    //     return next(errorHandler(400,"Please apply the filter!!"));
+    // }
     try {
        const data = await device.find(filter);
        if(data.length ===0)
