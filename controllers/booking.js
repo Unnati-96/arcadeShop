@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import booking from "../models/booking.js";
 import device from "../models/device.js";
 import { errorHandler } from "../utils/error.js";
@@ -14,7 +15,6 @@ export const createBooking = async (req, res, next) => {
     return next(errorHandler(400, "Device already Booked!!"));
   }
 
-  // Check if the device is already booked during the requested time slot
   const overlappingBookings = await booking.find({
     systemId,
     $or: [
@@ -26,19 +26,18 @@ export const createBooking = async (req, res, next) => {
     return next(errorHandler(400, "Device is already booked for this time slot"));
   }
 
-  // Check if one group can book only one device at a time
-  const multidevice = await booking.find({
+
+  const multipledevice = await booking.find({
     users: { $in: req.body.users },
     $or: [
       { entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } }
     ]
   });
 
-  if (multidevice.length > 0) {
+  if (multipledevice.length > 0) {
     return next(errorHandler(400, "One group can book one device at a time!!"));
   }
 
-  // Create a new booking
   const newBooking = new booking({ groupName, systemId, users, entryTime, exitTime });
 
   try {
@@ -49,23 +48,75 @@ export const createBooking = async (req, res, next) => {
     const duration = end - st; // Duration in milliseconds
 
     async function updateDeviceStatus() {
-      // Update device status when the booking starts
+    
       await device.updateOne({ systemId }, { $set: { isAvailable: false } });
       console.log(`Device ${systemId} booked and status updated to unavailable.`);
 
-      // Schedule to reset device status after the booking duration ends
+    
       setTimeout(async () => {
         await device.updateOne({ systemId }, { $set: { isAvailable: true } });
         console.log(`Device ${systemId} is now available.`);
-      }, duration); // Duration in milliseconds (after booking ends)
+      }, duration);
     }
 
-    // Schedule the status update to occur at booking entry time
+   
     const entryTimeDiff = st.getTime() - new Date().getTime();
-    setTimeout(updateDeviceStatus, entryTimeDiff); // Update device status when booking starts
+    setTimeout(updateDeviceStatus, entryTimeDiff); 
 
     return res.status(201).json({ message: "Booking created successfully!!", BookingId: savedBooking._id });
   } catch (error) {
     next(error);
   }
 };
+
+
+export const bookingHistory =  async (req,res,next)=>{
+    const {systemId,users,date} = req.query;
+    try {
+    let filter ={};
+        if(systemId && systemId.trim() !== "")
+        {
+            filter.systemId= systemId;
+        }
+        if(users && users !== "")
+        {
+            if(mongoose.Types.ObjectId.isValid(users))
+            {
+                filter.users=users;
+
+            }
+            else{
+                next(errorHandler(400,"Invalid Id format!!"))
+            }
+        }
+        if(date && date.trim() !== "")
+        {
+              // If a date is provided, calculate the start and end of the day in UTC
+       
+            const searchDate = new Date(date);
+            const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));  // 00:00:00 UTC of the given date
+            const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));  // 23:59:59.999 UTC of the given date
+
+            // Add date range filter to the query
+            filter.$or = [
+                { entryTime: { $gte: startOfDay, $lte: endOfDay } },
+                { exitTime: { $gte: startOfDay, $lte: endOfDay } }
+            ];
+        }
+        const data = await booking.find(filter);
+        if(Object.keys(filter).length ===0)
+        {
+             return res.status(200).json(data);
+        }
+        if(data.length===0)
+        {
+            return next(errorHandler(404,"Booking not found!!"));
+        }
+
+    return res.status(200).json(data);
+
+    } catch (error) {
+        next(error);
+    }
+
+}

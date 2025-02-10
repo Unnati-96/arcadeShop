@@ -24,13 +24,14 @@ export const addDevice = async (req,res,next)=>{
 export const updateDevice = async (req,res,next)=>{
   const id = req.params.id;
   try {
-  const data = await device.findByIdAndUpdate({_id:id},{name:req.body.name,description:req.body.description,pricePrHr:req.body.pricePrHr,status:req.body.status},{new:true});
+    console.log(req.body);
+  const data = await device.findByIdAndUpdate({_id:id},{name:req.body.name,description:req.body.description,pricePerHour:req.body.pricePerHour,status:req.body.status},{new:true});
   if(!data)
   {
     return next(errorHandler(404,"Device not found!!"))
   }
   console.log(data);
-   return res.status(200).json("Device updated successfully!!")
+   return res.status(200).json({message:"Device updated successfully!!",details:data});
   } catch (error) {
     next(error);
   }
@@ -65,13 +66,13 @@ export const searchDevice = async (req,res,next)=>{
             filter.systemId = systemId;
     }
        
-    
-    // if(Object.keys(filter).length === 0)
-    // {
-    //     return next(errorHandler(400,"Please apply the filter!!"));
-    // }
+
     try {
        const data = await device.find(filter);
+       if(Object.keys(filter).length === 0)
+        {
+            return res.status(200).json(data);
+        }
        if(data.length ===0)
         {
           return next(errorHandler(404,"Device not found!!"));

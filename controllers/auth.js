@@ -43,9 +43,9 @@ export const signinUser = async (req,res,next) =>{
         {
             return next(errorHandler(404,"Unauthorised,SignIn as Guest!!"));
         }
-     const token = jwt.sign({id:validUser._id},process.env.SECRET_KEY);
+     const token = jwt.sign({id:validUser._id,role:validUser.role},process.env.SECRET_KEY);
      const {password:pass,...rest} = validUser._doc;
-    return res.cookie("access_token",token,{httpOnly:true,secure:true}).status(201).json(rest);
+    return res.cookie("access_token",token,{httpOnly:true,secure:true, sameSite: 'None'}).status(200).json(rest);
   
     } catch (error) {
         next(error);

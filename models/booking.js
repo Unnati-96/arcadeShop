@@ -9,6 +9,7 @@ const bookingSchema = new mongoose.Schema({
     {
         type:String,
         ref:"device",
+        required:true
     },
     users:[{
         type:mongoose.Schema.Types.ObjectId,

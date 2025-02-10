@@ -13,7 +13,23 @@ export const verifyUser = (req,res,next)=>{
         {
             return next(errorHandler(403,"Unauthorized!!"));
         }
-      //   req.user = user;
+       req.user= user;
+       console.log(user);
         next();
      })
+}
+
+
+export const roleCheck = (allowedRoles)=>{
+   return (req,res,next)=>{
+    const role = req.user.role;
+    console.log(role);
+   //  if(role !== requiredRole)
+   if(!allowedRoles.includes(role))
+    {
+    return next(errorHandler(403,"Unauthorized!!"))
+    }
+    
+      next();
+   }
 }

@@ -16,13 +16,30 @@ import deldeviceRouter from "./routes/device.js";
 import searchdeviceRouter from "./routes/device.js";
 import cookieParser from "cookie-parser";
 import createbookingRouter from "./routes/booking.js";
+import bookingHistoryRouter  from "./routes/booking.js";
+import generatebillRouter from "./routes/billing.js";
+import getBillRouter from "./routes/billing.js";
+
 import cors from "cors";
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+// app.use(cors());
+const allowedOrigins = ['http://localhost:3000'];
+app.use(cors({
+    origin: function(origin, callback) {
+        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+}));
+
+
 const port = process.env.PORT || 5000;
 
 app.listen(port,()=>{
@@ -47,6 +64,10 @@ app.use("/arcade/device",deldeviceRouter);
 app.use("/arcade/device",searchdeviceRouter);
 
 app.use("/arcade/booking",createbookingRouter);
+app.use("/arcade/booking",bookingHistoryRouter);
+
+app.use("/arcade/billing",generatebillRouter);
+app.use("/arcade/billing",getBillRouter);
 
 app.use((err,req,res,next)=>{
     const statusCode = err.statusCode || 500;

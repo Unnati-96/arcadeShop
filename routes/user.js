@@ -1,12 +1,12 @@
 import express from "express";
 import { addUser, updateUser, delUser,searchUser } from "../controllers/user.js";
-import { verifyUser } from "../utils/verify.js";
+import { roleCheck, verifyUser } from "../utils/verify.js";
 
 const router = express.Router();
-router.post("/add",verifyUser,addUser);
+router.post("/add",verifyUser,roleCheck(["Admin","GuestAdmin"]),addUser);
 // router.get("/get",verifyUser,getUser);
-router.put("/update/:id",verifyUser,updateUser);
-router.delete("/delete/:id",verifyUser,delUser);
-router.get("/search",verifyUser,searchUser);
+router.put("/update/:id",verifyUser,roleCheck("Admin"),updateUser);
+router.delete("/delete/:id",verifyUser,roleCheck("Admin"),delUser);
+router.get("/search",verifyUser,roleCheck("Admin"),searchUser);
  
 export default router;
