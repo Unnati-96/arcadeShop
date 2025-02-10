@@ -86,23 +86,23 @@ const AddUserForm = ({ initialData, onSubmit, onReset, disabledInput, children }
             {/* Phone Number */}
             <div className="mb-4 flex items-center">
                 <label
-                    htmlFor="phone"
+                    htmlFor="phoneNo"
                     className="block text-gray-700 font-medium mr-4 w-1/3"
                 >
                     Phone Number:
                 </label>
                 <input
                     type="number"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
+                    id="phoneNo"
+                    name="phoneNo"
+                    value={formData.phoneNo}
                     onChange={handleChange}
                     className={`w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         disabledInput.includes("phone") ? "bg-gray-200" : ""
                     }`}
                     required
                     placeholder="9876543210"
-                    disabled={disabledInput.includes("phone")}
+                    disabled={disabledInput.includes("phoneNo")}
                 />
             </div>
 

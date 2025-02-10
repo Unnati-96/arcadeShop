@@ -3,45 +3,47 @@ import { RiDeleteBin5Fill } from "react-icons/ri";
 import { FaEdit } from "react-icons/fa";
 import Heading from "../components/Heading";
 import EditDevice from "./EditDevice";
+import {useNavigate} from "react-router-dom";
+import {deleteDevice, getDevice} from "../services/deviceService";
 
 const ViewDevices = () => {
     const [devices, setDevices] = useState([]);
-
-
-    const apiUrl ="http://localhost:8000/arcade/device/get"
+    const navigate = useNavigate();
+    const [loggedInUser, setLoggedInUser] = useState(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(apiUrl);
+        const fetchDevice = async () => {
+            const data = await getDevice();
+            if(data)    setDevices(data);
+            else console.error("Data Fetching failed");
+        }
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setLoggedInUser(storedUser);
+        }
 
-                const result = await response.json();
-                console.log(result)
-                setDevices(result);  // Set the fetched data
-                // setLoading(false);  // Set loading to false once data is fetched
-            } catch (error) {
-                // setError(error.message);  // Handle any errors
-                // setLoading(false);
-                console.log(error.message);
-            }
-        };
-
-        fetchData();
+        fetchDevice();
     }, []);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDevice, setSelectedDevice] = useState({});
 
-    const handleDelete = (deviceData) => {
-        console.log('Deleted data: ', deviceData);
+    const handleDelete = async (deviceData) => {
+        try{
+            const deletedDevice = await deleteDevice(deviceData);
+            if(deletedDevice){
+                console.log(deletedDevice);
+                navigate('/device/view');
+            }
+        }
+        catch(error){
+            console.error('Error: ', error.message);
+        }
     };
 
     const handleEdit = (deviceData) => {
-        console.log('Clicked Edit device on View Device Page with data: ', deviceData);
+        // open edit device modal
         setSelectedDevice(deviceData);
         setIsModalOpen(true);
     };
@@ -54,7 +56,7 @@ const ViewDevices = () => {
     return (
         <div className="w-full p-6 bg-white rounded-lg flex flex-col">
             <Heading title="View Devices" />
-
+            <p>Current use Testing: {loggedInUser}</p>
             {/* Table */}
             <div className="flex items-center justify-center mx-auto">
                 <table className="border border-collapse w-full">
@@ -72,10 +74,10 @@ const ViewDevices = () => {
                     <tbody>
                     {devices.map((device) => (
                         <tr key={device.systemId} className="border text-center hover:bg-green-100">
-                            <td className="px-5 py-3">{device.systemId}</td>
+                            <td className="px-5 py-3">{device.systemId} </td>
                             <td className="px-8 py-3">{device.deviceType}</td>
                             <td className="px-5 py-3">₹ {device.pricePerHour}</td>
-                            <td className="px-8 py-3">{device.availability}</td>
+                            <td className="px-8 py-3">{device.isAvailable ? "Available" : "Not Available"}</td>
                             <td className="px-8 py-3" title={device.description || "No Description"}>
                                 {device.description ? (device.description.length > 25 ? device.description.slice(0, 25) + "..." : device.description) : "No Description"}
                             </td>

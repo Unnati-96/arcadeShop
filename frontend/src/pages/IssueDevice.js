@@ -1,18 +1,24 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import ResetButton from "../components/ResetButton";
 import SubmitButton from "../components/SubmitButton";
 import Heading from "../components/Heading";
-import {AiFillDelete} from "react-icons/ai";
+import { AiFillDelete } from "react-icons/ai";
 import AddUserForm from "../components/AddUserForm";
 import EditModal from "../components/EditModal";
 import FindUser from "./FindUser";
+import { addUser } from "../services/userService";
+import { getDevice } from "../services/deviceService";
+import { bookDevice } from "../services/bookingService";
+import { useNavigate, useLocation } from "react-router-dom"; // <-- Added useLocation import
 
 const IssueDevice = () => {
+    const navigate = useNavigate();
+    const location = useLocation(); // <-- Added to access the location's state (formData)
+
     const [addUserModal, setAddUserModal] = useState(false);
     const [findUserModal, setFindUserModal] = useState(false);
-
+    const [device, setDevice] = useState([]);
     const [user, setUser] = useState([]);
-
     const [userFormData, setUserFormData] = useState({
         name: "",
         email: "",
@@ -24,19 +30,35 @@ const IssueDevice = () => {
     const [formData, setFormData] = useState({
         groupName: "",
         systemId: "",
-        users: [...user],
+        users: user,
         entryTime: "",
         exitTime: "",
-        duration: "",
     });
 
-    const handleUserDataSubmit = (submittedData) => {
-        // handle add new user
-        let updateUser = [...user];
-        updateUser.push(submittedData);
-        setUser(updateUser);
-        console.log("User data after adding user: ", user);
-        console.log("New Use Added data: ", submittedData);
+    const [addedUsers, setAddeduser] = useState(formData.users);
+    const handleAddedUsers = (u) => {
+        setAddeduser(u);
+        console.log("Addedusers: ", addedUsers);
+    };
+
+    const getDeviceList = async () => {
+        try {
+            const deviceList = await getDevice();
+            setDevice(deviceList);
+        } catch (error) {
+            console.error("Error: ", error.message);
+        }
+    };
+
+    const handleUserDataSubmit = async (submittedData) => {
+        try {
+            const newuser = await addUser(submittedData);
+            let updateUser = [...user];
+            updateUser.push(submittedData);
+            setUser(updateUser);
+        } catch (error) {
+            console.error("Error:", error.message);
+        }
     };
 
     const handleChange = (e) => {
@@ -51,10 +73,15 @@ const IssueDevice = () => {
         setUser([...user, ...newUser]);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle form submission logic
-        console.log("Form submitted with data:", formData);
+        try {
+            // const bookedDevice = await bookDevice(formData);
+            console.log("bookedDevice", formData);
+            navigate("/inventory/billing", { state: { formData } }); // Pass formData to Billing page
+        } catch (error) {
+            console.error("Error:", error.message);
+        }
     };
 
     const handleReset = () => {
@@ -67,22 +94,33 @@ const IssueDevice = () => {
             duration: "",
         });
     };
-    // ===============================================================================================
-    const handelDeleteUser = (duser) => {
+
+    const handelRemoveUser = (duser) => {
         let updatedUsers = user;
-        updatedUsers.filter( (u) => u === duser);
-        // setFormData(prevFormData => ({
-        //     ...prevFormData,
-        //     users: updatedUsers
-        // }));
+        updatedUsers = updatedUsers.filter((u) => u !== duser);
         setUser(updatedUsers);
         console.log(user);
     };
 
-    useEffect(() => {},[formData.users])
+    const [loggedInUser, setLoggedInUser] = useState(null);
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setLoggedInUser(storedUser);
+        }
+        getDeviceList();
+
+        // <-- New: Check if formData is passed via location.state
+        const storedData = location.state?.formData;
+        if (storedData) {
+            setFormData(storedData); // Set formData if passed
+        }
+    }, [formData.users, user, location.state]); // <-- Added location.state as a dependency
+
     return (
         <div className="w-[60vw] p-6 ">
             <Heading title="Issue Device" />
+            <p>Current user testing: {loggedInUser}</p>
             <form className="my-10 ml-32" onSubmit={handleSubmit}>
                 {/* Group Name & System ID */}
                 <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -97,6 +135,7 @@ const IssueDevice = () => {
                             placeholder="XG Gamer"
                             onChange={handleChange}
                             value={formData.groupName}
+                            required
                         />
                     </div>
 
@@ -109,11 +148,12 @@ const IssueDevice = () => {
                             className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                             onChange={handleChange}
                             value={formData.systemId}
+                            required
                         >
                             <option value="" disabled>Select</option>
-                            <option value="S12-PS5">S12-PS5</option>
-                            <option value="S11-VR-3">S11-VR</option>
-                            <option value="S05-VR">S05-VR</option>
+                            {device.map((d) => (
+                                <option key={d._id} value={d.systemId}>{d.systemId}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -125,15 +165,16 @@ const IssueDevice = () => {
                     </label>
                     <table className="w-full">
                         <tbody>
-                            { user.map((usr, index) => (
-                                <tr className="border-b flex items-center w-full" key={index}>
-                                    <td className="px-8 py-3">{index+1} </td>
-                                    <td className="px-8 py-3 w-1/4">{usr.name}</td>
-                                    <td className="px-10 py-3 w-2/4">{usr.email}</td>
-                                    {/* delete button not working =========================*/}
-                                    <td className="px-8 py-3 hover:cursor-pointer hover:text-red-500"><AiFillDelete onClick={() => handelDeleteUser(usr)}/></td>
-                                </tr>
-                            )) }
+                        {user.map((usr, index) => (
+                            <tr className="border-b flex items-center w-full" key={index}>
+                                <td className="px-8 py-3">{index + 1}</td>
+                                <td className="px-8 py-3 w-1/4">{usr.name}</td>
+                                <td className="px-10 py-3 w-2/4">{usr.email}</td>
+                                <td className="px-8 py-3 hover:cursor-pointer hover:text-red-500">
+                                    <AiFillDelete onClick={() => handelRemoveUser(usr)} />
+                                </td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                     <div className="mt-5 flex items-center justify-around text-blue-600">
@@ -171,26 +212,7 @@ const IssueDevice = () => {
                     </div>
                 </div>
 
-                {/* OR Section */}
-                <div className=" text-center">OR</div>
-
-                {/* Duration */}
-                <div className="mb-6 flex items-center justify-center">
-                    <div className="w-[48%]">
-                        <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
-                            Duration
-                        </label>
-                        <input
-                            type="time"
-                            name="duration"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                            onChange={handleChange}
-                            value={formData.duration}
-                        />
-                    </div>
-                </div>
-
-                {/*Buttons*/}
+                {/* Buttons */}
                 <div className="mt-10 flex items-center justify-center space-x-10">
                     <ResetButton onReset={handleReset} />
                     <SubmitButton text="Proceed"/>
@@ -200,10 +222,8 @@ const IssueDevice = () => {
             {/* Modal */}
             {addUserModal && (
                 <>
-                    {/* Overlay background to disable background interaction */}
                     <div className="fixed inset-0 bg-gray-800 opacity-50 z-50"></div>
-
-                    <EditModal onClose={() => setAddUserModal(false)} >
+                    <EditModal onClose={() => setAddUserModal(false)}>
                         <Heading title="Add User Details" />
                         <AddUserForm initialData={userFormData} onSubmit={handleUserDataSubmit} disabledInput={["role"]}>
                             <ResetButton text="Cancel" onReset={() => setAddUserModal(false)} />
@@ -214,12 +234,10 @@ const IssueDevice = () => {
 
             {findUserModal && (
                 <>
-                    {/* Overlay background to disable background interaction */}
                     <div className="fixed inset-0 bg-gray-800 opacity-50 z-50"></div>
-                    <EditModal onClose={() => setFindUserModal(false)} >
+                    <EditModal onClose={() => setFindUserModal(false)}>
                         <Heading title="Select User" />
-                        {/* code for select user modal content */}
-                        <FindUser onClose={handleSaveUser} />
+                        <FindUser onClose={handleSaveUser} handleAddedUsers={handleAddedUsers} />
                     </EditModal>
                 </>
             )}

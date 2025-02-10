@@ -13,6 +13,7 @@ import Landing from "./pages/Landing";
 import Signup from "./pages/Signup";
 import EditUser from "./pages/EditUser";
 import EditDevice from "./pages/EditDevice";
+import Billing from "./pages/Billing";
 
 function App() {
     return (
@@ -44,8 +45,8 @@ function LocationAwareApp() {
                         {/*<Route path="/user/update" element={<EditUser />} />*/}
                         <Route path="/device/add" element={<AddDevice />} />
                         <Route path="/device/view" element={<ViewDevices />} />
-                        {/*<Route path="/device/update" element={<EditDevice />} />*/}
-                        <Route path="/inventory/booking" element={<IssueDevice />} />
+                        <Route path="/inventory/billing" element={<Billing />} />
+                        <Route path="/inventory/issue-device" element={<IssueDevice />} />
                         <Route path="/inventory/history" element={<ViewUsers />} />
                     </Routes>
                 </div>

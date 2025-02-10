@@ -40,8 +40,8 @@ const Sidebar = () => {
                     </a>
                 </li>
                 <li>
-                    <a href="/inventory/booking" className={`flex items-center space-x-2 text-sm hover:bg-teal-500 py-2 px-4 rounded-md
-                        ${location.pathname === '/inventory/booking' && "bg-teal-500"}`}>
+                    <a href="/inventory/issue-device" className={`flex items-center space-x-2 text-sm hover:bg-teal-500 py-2 px-4 rounded-md
+                        ${(location.pathname === '/inventory/issue-device' || location.pathname === '/inventory/billing') && "bg-teal-500"}`}>
                         <FaTools className="w-5 h-5" />
                         <span>Issue Device</span>
                     </a>

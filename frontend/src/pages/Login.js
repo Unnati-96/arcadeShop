@@ -1,9 +1,12 @@
 import {useState} from "react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {loginUser} from "../services/authService";
 
 const Login = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
+        role: '',
         password: '',
     });
 
@@ -12,9 +15,20 @@ const Login = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleLogin = (evt) => {
-        evt.preventDefault();
-        console.log("Login: ", formData);
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try{
+            const loginData = await loginUser(formData);
+            // console.log("Login: ", loginData);
+            if(loginData) {
+                // console.log("Loggedin User: ",loginData);
+                // console.log("Loggedin User from localStorage: ", localStorage);
+                navigate('/device/view');
+            }
+        }
+        catch(error){
+            console.error("Error: ", error.message);
+        }
     };
 
     return (
@@ -37,6 +51,25 @@ const Login = () => {
                             placeholder="your@email.com"
                             required
                         />
+                    </div>
+
+                    {/* Role */}
+                    <div className="mb-5 flex items-center border border-gray-300 rounded-lg ">
+                        <label
+                            htmlFor="role"
+                            className="text-sm font-medium text-gray-700 w-1/3 px-4 py-2 border-r-2 border-gray-300 ">Role</label>
+                        <select
+                            id="role"
+                            name="role"
+                            value={formData.role}
+                            onChange={handleOnChange}
+                            required
+                            className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                            <option value="" disabled selected>Select</option>
+                            <option value="Admin">Admin</option>
+                            <option value="GuestAdmin">Guest Admin</option>
+                            <option value="Guest">Guest</option>
+                        </select>
                     </div>
 
                     <div className="mb-6">

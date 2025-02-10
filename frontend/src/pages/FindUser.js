@@ -1,18 +1,9 @@
 import SubmitButton from "../components/SubmitButton";
 import {useEffect, useState} from "react";
+import {getUser} from "../services/userService";
 
-const FindUser = ({ onClose }) => {
-    const [users, setUsers] = useState([
-        { name: "Amit Sharma", email: "amit.sharma@gmail.com", phone: "9123456789", password: "Password@2123", role: "Admin" },
-        { name: "Ravi Patel", email: "ravi.patel@yahoo.com", phone: "9876123456", password: "Password@2123", role: "Guest Admin" },
-        { name: "Priya Yadav", email: "priya.yadav@outlook.com", phone: "9765432111", password: "Password@2123", role: "User" },
-        { name: "Rohit Singh", email: "rohit.singh@aol.com", phone: "9345678910", password: "Password@2123", role: "User" },
-        { name: "Nisha Gupta", email: "nisha.gupta@gmail.com", phone: "9845123456", password: "Password@2123", role: "Admin" },
-        { name: "Vikram Reddy", email: "vikram.reddy@icloud.com", phone: "9356123412", password: "Password@2123", role: "User" },
-        { name: "Anjali Mehta", email: "anjali.mehta@live.com", phone: "9098765432", password: "Password@2123", role: "User" },
-        { name: "Kunal Verma", email: "kunal.verma@gmail.com", phone: "8765432109", password: "Password@2123", role: "Guest Admin" },
-    ]);
-
+const FindUser = ({ onClose, handleAddedUsers }) => {
+    const [users, setUsers] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
 
     const [filterFormData, setFilterFormData] = useState({
@@ -26,37 +17,58 @@ const FindUser = ({ onClose }) => {
         setFilterFormData({ ...filterFormData, [name]: value });
     };
 
-    const handleApplyFilter = (e) => {
+    const handleApplyFilter = async (e) => { // need to be worked out
         e.preventDefault();
         console.log(filterFormData);
-        // handle apply filter logic
+        const filterdUserList = await getUser(filterFormData);
+        setUsers(filterdUserList);
+        console.log("Filteres user List: ", filterdUserList);
     };
 
     const handleRowClick = (user) => {
         console.log(user)
-        const isSelected = selectedUsers.some(u => u.email === user.email);
+        const isSelected = selectedUsers.some(u => u._id === user._id);
         if (isSelected) {
-            setSelectedUsers(selectedUsers.filter(u => u.email !== user.email));
-        } else {
+            setSelectedUsers(selectedUsers.filter(u => u._id !== user._id));
+        }
+        else {
             setSelectedUsers([...selectedUsers, user]);
         }
     };
 
     const handleCheckboxChange = (e, user) => {
         if (e.target.checked) {
+
             setSelectedUsers([...selectedUsers, user]);
         } else {
             setSelectedUsers(selectedUsers.filter(u => u.email !== user.email));
         }
     };
 
+    const [loggedInUser, setLoggedInUser] = useState(null);
     useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const allUsersList = await getUser();
+                setUsers(allUsersList);
+            } catch (error) {
+                console.error("Error: ", error.message);
+            }
+        };
+        // console.log("SelectedUsers: ",selectedUsers)
+        fetchUsers();
+        handleAddedUsers(selectedUsers);
+
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setLoggedInUser(storedUser);
+        }
         onClose(selectedUsers);
     }, [selectedUsers]);
 
-
     return (
         <div className="flex flex-col">
+            <p>Currrent user testing: {loggedInUser}</p>
             {/* filter */}
             <div className="flex border px-5 py-4 mb-4">
                 <form
@@ -128,7 +140,7 @@ const FindUser = ({ onClose }) => {
                             </thead>
                             <tbody>
                             {users.map((user) => {
-                                const isSelected = selectedUsers.some(u => u.email === user.email);
+                                const isSelected = selectedUsers.some(u => u._id === user._id);
                                 return (
                                     <tr
                                         key={user.email}

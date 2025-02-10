@@ -3,18 +3,27 @@ import { RiDeleteBin5Fill } from "react-icons/ri";
 import {FaEdit} from "react-icons/fa";
 import Heading from "../components/Heading";
 import EditUser from "./EditUser";
-import {deleteUser, getUser} from "../context/UserContext";
-// import {IoMdEye} from "react-icons/io";
+import {useNavigate} from "react-router-dom";
+import {deleteUser, getUser } from "../services/userService";
 
 const ViewDevices = () => {
     const [users, setUsers] = useState([]);
+    const navigate = useNavigate();
 
+    const [loggedInUser, setLoggedInUser] = useState(null)
     useEffect( () => {
         const fetchUser = async () => {
             const data = await getUser();
             if(data)    setUsers(data);
             else console.error("Data Fetching failed");
         }
+
+
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setLoggedInUser(storedUser);
+        }
+
 
         fetchUser();
     }, []);
@@ -23,17 +32,19 @@ const ViewDevices = () => {
     const [selectedUser, setSelectedUser] = useState({});
 
     const handleDelete = async (userData) => {
-        console.log('Deleted data: ', userData);
-        const isDelete = await deleteUser(userData._id);
-        if(isDelete) {
-            console.log('Deleted user: ', isDelete);
-        }else{
-            console.error('User deletion failed');
+        try {
+            const deletedUser = await deleteUser(userData);
+            if(deletedUser) {
+                console.log('Deleted user: ', deletedUser);
+                navigate('/user/view');
+            }
+        }catch(error){
+            console.error('Error: ', error.message);
         }
     };
 
     const handleEdit = (userData) => {
-        console.log('Clicked Edit device on View Device Page with data: ', userData);
+        // open the Edit Modal for editing user
         setSelectedUser(userData);
         setIsModalOpen(true);
     };
@@ -46,6 +57,8 @@ const ViewDevices = () => {
     return (
         <div className="w-full p-6 bg-white rounded-lg flex flex-col">
             <Heading title="View Users List" />
+            <p>Current user Tsting: {loggedInUser}</p>
+
             {/*Table*/}
             <div className="flex items-center justify-center mx-auto">
                 <table className="border border-collapse w-full">
@@ -54,7 +67,7 @@ const ViewDevices = () => {
                         <td className="px-8 py-3 w-fit">Name</td>
                         <td className="px-8 py-3 w-fit">Email</td>
                         <td className="px-8 py-3 w-fit">Phone</td>
-                        <td className="px-8 py-3 w-fit">Password</td>
+                        {/*<td className="px-8 py-3 w-fit">Password</td>*/}
                         <td className="px-8 py-3 w-fit">Role</td>
                         <td className="px-5 py-3 w-fit">Edit</td>
                         <td className="px-5 py-3 w-fit">Delete</td>
@@ -65,8 +78,8 @@ const ViewDevices = () => {
                         <tr key={user.email} className="border text-center hover:bg-green-100">
                             <td className="px-8 py-3 w-fit">{user.name}</td>
                             <td className="px-8 py-3 w-fit">{user.email}</td>
-                            <td className="px-8 py-3 w-fit">{user.phone}</td>
-                            <td className="px-8 py-3 w-fit flex items-center justify-evenly space-x-4"><span>{ user.password}</span></td>
+                            <td className="px-8 py-3 w-fit">{user.phoneNo}</td>
+                            {/*<td className="px-8 py-3 w-fit flex items-center justify-evenly space-x-4"><span>{ user.password}</span></td>*/}
                             <td className="px-8 py-3 w-fit">{user.role}</td>
                             <td className="px-5 py-3">
                                 <button className="text-blue-500 hover:scale-125 text-xl" onClick={() => handleEdit(user)}><FaEdit /></button>
