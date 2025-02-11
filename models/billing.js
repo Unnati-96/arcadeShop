@@ -4,7 +4,7 @@ const billSchema = new mongoose.Schema({
     bookingId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"booking",
-        required:true
+        required:true,
     },
     systemId :{
         type:String

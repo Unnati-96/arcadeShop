@@ -7,19 +7,27 @@ export const createBooking = async (req, res, next) => {
   const { groupName, systemId, users, entryTime, exitTime } = req.body;
 
   const validDevice = await device.findOne({ systemId });
+  
   if (!validDevice) {
     return next(errorHandler(404, "Device not found!!"));
   }
 
-  if (!validDevice.isAvailable) {
-    return next(errorHandler(400, "Device already Booked!!"));
-  }
+  // if (!validDevice.isAvailable) {
+  //   return next(errorHandler(400, "Device already Booked!!"));
+  // }
 
+  // const overlappingBookings = await booking.find({
+  //   systemId,
+  //   $or: [
+  //     { entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } }
+  //   ]
+  // });
+
+  
   const overlappingBookings = await booking.find({
     systemId,
-    $or: [
-      { entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } }
-    ]
+      entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } 
+    
   });
 
   if (overlappingBookings.length > 0) {
@@ -29,9 +37,8 @@ export const createBooking = async (req, res, next) => {
 
   const multipledevice = await booking.find({
     users: { $in: req.body.users },
-    $or: [
-      { entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } }
-    ]
+  entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } 
+    
   });
 
   if (multipledevice.length > 0) {
@@ -40,7 +47,7 @@ export const createBooking = async (req, res, next) => {
 
   const newBooking = new booking({ groupName, systemId, users, entryTime, exitTime });
 
-  try {
+  try { 
     const savedBooking = await newBooking.save();
 
     const st = new Date(req.body.entryTime);

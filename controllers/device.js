@@ -65,8 +65,6 @@ export const searchDevice = async (req,res,next)=>{
        
             filter.systemId = systemId;
     }
-       
-
     try {
        const data = await device.find(filter);
        if(Object.keys(filter).length === 0)

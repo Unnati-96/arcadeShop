@@ -9,6 +9,7 @@ export const addUser =  async (req,res,next)=>{
     console.log(data);
     res.status(201).json("User created successfully!!");    
     } catch (error) {
+        console.log(error);
        next(error); 
     }
 }
