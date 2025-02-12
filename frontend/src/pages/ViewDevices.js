@@ -1,47 +1,57 @@
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { FaEdit } from "react-icons/fa";
 import Heading from "../components/Heading";
 import EditDevice from "./EditDevice";
+import {useNavigate} from "react-router-dom";
+import {deleteDevice, getDevice} from "../services/deviceService";
+import {ArcadeContext} from "../context/ArcadeContext";
+import Error from "../components/Error";
 
 const ViewDevices = () => {
     const [devices, setDevices] = useState([]);
-
-
-    const apiUrl ="http://localhost:8000/arcade/device/get"
+    const navigate = useNavigate();
+    const [error, setError] = useState(null);
+    const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user')));
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(apiUrl);
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const result = await response.json();
-                console.log(result)
-                setDevices(result);  // Set the fetched data
-                // setLoading(false);  // Set loading to false once data is fetched
-            } catch (error) {
-                // setError(error.message);  // Handle any errors
-                // setLoading(false);
-                console.log(error.message);
+        const fetchDevice = async () => {
+            try{
+                const data = await getDevice();
+                if (data) setDevices(data);
             }
-        };
+            catch(error) {
+                setError(error.message || "An unknown error occurred");
+                // console.error("Data Fetching failed");
+            }
+        }
 
-        fetchData();
-    }, []);
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setCurrentUser(JSON.parse(localStorage.getItem('user')));
+        }
+        fetchDevice();
+    }, [error]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDevice, setSelectedDevice] = useState({});
 
-    const handleDelete = (deviceData) => {
-        console.log('Deleted data: ', deviceData);
+    const handleDelete = async (deviceData) => {
+        try{
+            const deletedDevice = await deleteDevice(deviceData);
+            if(deletedDevice){
+                console.log(deletedDevice);
+                navigate('/device/view');
+            }
+        }
+        catch(error){
+            // console.error('Error: ', error.message);
+            setError(error.message || "An unknown error occurred");
+        }
     };
 
     const handleEdit = (deviceData) => {
-        console.log('Clicked Edit device on View Device Page with data: ', deviceData);
+        // open edit device modal
         setSelectedDevice(deviceData);
         setIsModalOpen(true);
     };
@@ -54,6 +64,9 @@ const ViewDevices = () => {
     return (
         <div className="w-full p-6 bg-white rounded-lg flex flex-col">
             <Heading title="View Devices" />
+            {/*<p>Current use Testing: {currentUser.name}</p>*/}
+
+            {error && <Error error={error} />}
 
             {/* Table */}
             <div className="flex items-center justify-center mx-auto">
@@ -65,26 +78,34 @@ const ViewDevices = () => {
                         <td className="px-5 py-3 w-fit">Price/hour</td>
                         <td className="px-8 py-3 w-fit">Availability</td>
                         <td className="px-8 py-3">Description</td>
-                        <td className="px-4 py-3 w-fit">Edit</td>
-                        <td className="px-4 py-3 w-fit">Delete</td>
+                        {(currentUser.role === 'Admin') &&
+                            (<>
+                                <td className="px-4 py-3 w-fit">Edit</td>
+                                <td className="px-4 py-3 w-fit">Delete</td>
+                            </>)
+                        }
                     </tr>
                     </thead>
                     <tbody>
                     {devices.map((device) => (
                         <tr key={device.systemId} className="border text-center hover:bg-green-100">
-                            <td className="px-5 py-3">{device.systemId}</td>
+                            <td className="px-5 py-3">{device.systemId} </td>
                             <td className="px-8 py-3">{device.deviceType}</td>
                             <td className="px-5 py-3">₹ {device.pricePerHour}</td>
-                            <td className="px-8 py-3">{device.availability}</td>
+                            <td className="px-8 py-3">{device.isAvailable ? "Available" : "Not Available"}</td>
                             <td className="px-8 py-3" title={device.description || "No Description"}>
                                 {device.description ? (device.description.length > 25 ? device.description.slice(0, 25) + "..." : device.description) : "No Description"}
                             </td>
-                            <td className="px-4 py-3">
-                                <button className="text-blue-500 hover:scale-125 text-xl" onClick={() => handleEdit(device)}><FaEdit /></button>
-                            </td>
-                            <td className="px-4 py-3">
-                                <button className="text-red-500 hover:scale-125 text-xl" onClick={() => handleDelete(device)}><RiDeleteBin5Fill /></button>
-                            </td>
+                            {(currentUser.role === 'Admin') &&
+                                (<>
+                                    <td className="px-4 py-3">
+                                        <button className="text-blue-500 hover:scale-125 text-xl" onClick={() => handleEdit(device)}><FaEdit /></button>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <button className="text-red-500 hover:scale-125 text-xl" onClick={() => handleDelete(device)}><RiDeleteBin5Fill /></button>
+                                    </td>
+                                </>)
+                            }
                         </tr>
                     ))}
                     </tbody>

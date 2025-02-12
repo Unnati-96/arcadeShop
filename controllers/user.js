@@ -1,20 +1,25 @@
+
+import bcryptjs from "bcryptjs";
 import user from "../models/user.js";
 import { errorHandler } from "../utils/error.js";
-
-
-
 export const addUser =  async (req,res,next)=>{
     try {
-    const data = await user.create(req.body);
+        const {password} = req.body;
+    const hashedPassword =  bcryptjs.hashSync(password,10);
+    const newUser = {
+        ...req.body,
+        password: hashedPassword,
+    }
+    console.log("New User: ", newUser)
+    const data = await user.create(newUser);
     console.log(data);
-    res.status(201).json("User created successfully!!");    
+    res.status(201).json("User created successfully!!");
     } catch (error) {
         console.log(error);
-       next(error); 
+       next(error);
     }
 }
-
-// export const getUser = async (req,res,next)=>{ 
+// export const getUser = async (req,res,next)=>{
 //     try {
 //        const data = await user.find({});
 //        console.log(data);
@@ -23,7 +28,6 @@ export const addUser =  async (req,res,next)=>{
 //         next(error);
 //     }
 // }
-
 export const updateUser = async (req,res,next)=>{
     const id = req.params.id;
     try {
@@ -41,10 +45,9 @@ export const updateUser = async (req,res,next)=>{
         console.log(data);
         return res.status(200).json({message:"User updated successfully!!",updatedUser:data});
     } catch (error) {
-      next(error);  
+      next(error);
     }
 }
-
 export const delUser = async (req,res,next)=>{
     const id = req.params.id;
     try {
@@ -59,7 +62,6 @@ export const delUser = async (req,res,next)=>{
         next(error);
     }
 }
-
 export const searchUser = async (req,res,next)=>{
     const {name,email,phoneNo} = req.query;
     let filter = {};
@@ -67,13 +69,10 @@ export const searchUser = async (req,res,next)=>{
     {
         filter.name = {$regex:name,$options:"i"};
     }
-    
     if(email && email.trim() !== "")
     {
-
         filter.email = {$regex:email,$options:"i"};
     }
-    
     if(phoneNo && phoneNo.trim() !== "")
     {
         const num = Number(phoneNo);
@@ -83,7 +82,6 @@ export const searchUser = async (req,res,next)=>{
         }
         filter.phoneNo= num;
     }
-   
     // if(Object.keys(filter).length === 0)
     // {
     // return next(errorHandler(400,"Bad Request,please provide user information!"))
@@ -98,5 +96,4 @@ export const searchUser = async (req,res,next)=>{
     } catch (error) {
         next(error);
     }
-
 }

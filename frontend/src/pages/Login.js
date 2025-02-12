@@ -1,21 +1,50 @@
-import {useState} from "react";
-import {Link} from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../services/authService";
+import { ArcadeContext } from "../context/ArcadeContext";
+import Error from "../components/Error";
 
 const Login = () => {
+    const { setIsLoggedIn } = useContext(ArcadeContext);
+    const navigate = useNavigate();
+    const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user')));
+    const [error, setError] = useState(null);
+
     const [formData, setFormData] = useState({
         email: '',
+        role: '',
         password: '',
     });
 
     const handleOnChange = (e) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleLogin = (evt) => {
-        evt.preventDefault();
-        console.log("Login: ", formData);
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            const loginData = await loginUser(formData);
+            if (loginData) {
+                const storedUser = JSON.parse(localStorage.getItem('user'));
+                if (storedUser) {
+                    setCurrentUser(storedUser);
+                }
+
+                setIsLoggedIn(true);
+                navigate('/device/view');
+            }
+        } catch (error) {
+            setError(error.message || "An unknown error occurred");
+        }
     };
+
+    // You can handle error display here if needed, but useEffect isn't necessary unless you want to trigger something else.
+    useEffect(() => {
+        if (error) {
+            console.log("Error occurred:", error);
+        }
+    }, [error]);
 
     return (
         <div className="py-24 bg-gray-100 flex items-center justify-center p-4">
@@ -39,6 +68,25 @@ const Login = () => {
                         />
                     </div>
 
+                    {/* Role */}
+                    <div className="mb-5 flex items-center border border-gray-300 rounded-lg ">
+                        <label
+                            htmlFor="role"
+                            className="text-sm font-medium text-gray-700 w-1/3 px-4 py-2 border-r-2 border-gray-300 ">Role</label>
+                        <select
+                            id="role"
+                            name="role"
+                            value={formData.role}
+                            onChange={handleOnChange}
+                            required
+                            className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                            <option value="" disabled>Select</option>
+                            <option value="Admin">Admin</option>
+                            <option value="GuestAdmin">Guest Admin</option>
+                            <option value="Guest">User</option>
+                        </select>
+                    </div>
+
                     <div className="mb-6">
                         <label
                             htmlFor="password"
@@ -54,6 +102,9 @@ const Login = () => {
                             required
                         />
                     </div>
+
+                    {/*Error Display*/}
+                    {error && <Error error={error} />}
 
                     <div className="my-10 flex items-center justify-center">
                         <button
@@ -72,4 +123,5 @@ const Login = () => {
         </div>
     );
 }
+
 export default Login;

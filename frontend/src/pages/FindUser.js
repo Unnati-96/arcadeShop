@@ -1,24 +1,17 @@
 import SubmitButton from "../components/SubmitButton";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
+import { getUser } from "../services/userService";
+import Error from "../components/Error";
 
-const FindUser = ({ onClose }) => {
-    const [users, setUsers] = useState([
-        { name: "Amit Sharma", email: "amit.sharma@gmail.com", phone: "9123456789", password: "Password@2123", role: "Admin" },
-        { name: "Ravi Patel", email: "ravi.patel@yahoo.com", phone: "9876123456", password: "Password@2123", role: "Guest Admin" },
-        { name: "Priya Yadav", email: "priya.yadav@outlook.com", phone: "9765432111", password: "Password@2123", role: "User" },
-        { name: "Rohit Singh", email: "rohit.singh@aol.com", phone: "9345678910", password: "Password@2123", role: "User" },
-        { name: "Nisha Gupta", email: "nisha.gupta@gmail.com", phone: "9845123456", password: "Password@2123", role: "Admin" },
-        { name: "Vikram Reddy", email: "vikram.reddy@icloud.com", phone: "9356123412", password: "Password@2123", role: "User" },
-        { name: "Anjali Mehta", email: "anjali.mehta@live.com", phone: "9098765432", password: "Password@2123", role: "User" },
-        { name: "Kunal Verma", email: "kunal.verma@gmail.com", phone: "8765432109", password: "Password@2123", role: "Guest Admin" },
-    ]);
-
-    const [selectedUsers, setSelectedUsers] = useState([]);
+const FindUser = ({ onClose, handleAddedUsers, selectdUsers }) => {
+    const [users, setUsers] = useState(selectdUsers);
+    const [selectedUsers, setSelectedUsers] = useState(selectdUsers);
+    const [error, setError] = useState(null);
 
     const [filterFormData, setFilterFormData] = useState({
         email: "",
         name: "",
-        phone: "",
+        phoneNo: "",
     });
 
     const handleOnChange = (e) => {
@@ -26,21 +19,25 @@ const FindUser = ({ onClose }) => {
         setFilterFormData({ ...filterFormData, [name]: value });
     };
 
-    const handleApplyFilter = (e) => {
+    const handleApplyFilter = async (e) => {
         e.preventDefault();
-        console.log(filterFormData);
-        // handle apply filter logic
+        // console.log(filterFormData);
+        const filterdUserList = await getUser(filterFormData);
+        setUsers(filterdUserList);
+        // console.log("Filtered user List: ", filterdUserList);
     };
 
     const handleRowClick = (user) => {
-        console.log(user)
-        const isSelected = selectedUsers.some(u => u.email === user.email);
+        // console.log(user._id);
+        const isSelected = selectedUsers.some(u => u._id === user._id);
         if (isSelected) {
-            setSelectedUsers(selectedUsers.filter(u => u.email !== user.email));
-        } else {
+            setSelectedUsers(selectedUsers.filter(u => u._id !== user._id));
+        }
+        else {
             setSelectedUsers([...selectedUsers, user]);
         }
     };
+
 
     const handleCheckboxChange = (e, user) => {
         if (e.target.checked) {
@@ -50,14 +47,32 @@ const FindUser = ({ onClose }) => {
         }
     };
 
+    const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user')));
     useEffect(() => {
-        onClose(selectedUsers);
-    }, [selectedUsers]);
+        const fetchUsers = async () => {
+            try {
+                const allUsersList = await getUser();
+                setUsers(allUsersList);
+            } catch (error) {
+                setError(error.message || 'An Unkonwn error occured.');
+                // console.error("Error: ", error.message);
+            }
+        };
 
+        fetchUsers();
+        handleAddedUsers(selectedUsers);
+
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setCurrentUser(JSON.parse(localStorage.getItem('user')));
+        }
+        onClose(selectedUsers);
+        console.log("Selected user: ", selectedUsers)
+    }, [selectedUsers, error]);
 
     return (
         <div className="flex flex-col">
-            {/* filter */}
+            {/* Filter */}
             <div className="flex border px-5 py-4 mb-4">
                 <form
                     onSubmit={handleApplyFilter}
@@ -94,14 +109,14 @@ const FindUser = ({ onClose }) => {
 
                     <div>
                         <label
-                            htmlFor="phone"
+                            htmlFor="phoneNo"
                             className="block text-sm font-medium text-gray-700 mb-1 text-left">Phone</label>
                         <input
                             type="number"
-                            name="phone"
-                            id="phone"
+                            name="phoneNo"
+                            id="phoneNo"
                             onChange={handleOnChange}
-                            value={filterFormData.phone}
+                            value={filterFormData.phoneNo}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                             placeholder="27568348593"
                         />
@@ -113,45 +128,45 @@ const FindUser = ({ onClose }) => {
                 </form>
             </div>
 
+            {error && <Error error={error} />}
+
             {/* User list Table as per filter */}
             <div className="max-h-[65vh] overflow-y-scroll">
-                {/*<form className="space-x-4 flex justify-evenly items-center w-full">*/}
-                    <div className="flex items-center justify-center mx-auto">
-                        <table className="w-full">
-                            <thead>
-                            <tr className="font-bold text-lg border-y-2 text-center">
-                                <td className="px-8 py-3 w-fit">Select</td>
-                                <td className="px-8 py-3 w-fit">Name</td>
-                                <td className="px-8 py-3 w-fit">Email</td>
-                                <td className="px-8 py-3 w-fit">Phone</td>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {users.map((user) => {
-                                const isSelected = selectedUsers.some(u => u.email === user.email);
-                                return (
-                                    <tr
-                                        key={user.email}
-                                        className="border-b text-center hover:bg-green-50 hover:cursor-pointer"
-                                        onClick={() => handleRowClick(user)}
-                                    >
-                                        <td className="px-8 py-3 w-fit">
-                                            <input
-                                                type="checkbox"
-                                                checked={isSelected}
-                                                onChange={(e) => handleCheckboxChange(e, user)}
-                                            />
-                                        </td>
-                                        <td className="px-8 py-3 w-fit">{user.name}</td>
-                                        <td className="px-8 py-3 w-fit">{user.email}</td>
-                                        <td className="px-8 py-3 w-fit">{user.phone}</td>
-                                    </tr>
-                                );
-                            })}
-                            </tbody>
-                        </table>
-                    </div>
-                {/*</form>*/}
+                <div className="flex items-center justify-center mx-auto">
+                    <table className="w-full">
+                        <thead>
+                        <tr className="font-bold text-lg border-y-2 text-center">
+                            <td className="px-8 py-3 w-fit">Select</td>
+                            <td className="px-8 py-3 w-fit">Name</td>
+                            <td className="px-8 py-3 w-fit">Email</td>
+                            <td className="px-8 py-3 w-fit">Phone</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {users.map((user) => {
+                            const isSelected = selectedUsers.some(u => u._id === user._id);
+                            return (
+                                <tr
+                                    key={user.email}
+                                    className="border-b text-center hover:bg-green-50 hover:cursor-pointer"
+                                    onClick={() => handleRowClick(user)}
+                                >
+                                    <td className="px-8 py-3 w-fit">
+                                        <input
+                                            type="checkbox"
+                                            checked={isSelected}
+                                            onChange={(e) => handleCheckboxChange(e, user)}
+                                        />
+                                    </td>
+                                    <td className="px-8 py-3 w-fit">{user.name}</td>
+                                    <td className="px-8 py-3 w-fit">{user.email}</td>
+                                    <td className="px-8 py-3 w-fit">{user.phoneNo}</td>
+                                </tr>
+                            );
+                        })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

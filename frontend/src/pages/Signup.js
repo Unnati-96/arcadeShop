@@ -1,15 +1,17 @@
 import {Link, useNavigate} from "react-router-dom";
-import {useState} from "react";
-import {createUser} from "../context/UserContext";
+import {useEffect, useState} from "react";
+import {signupUser} from "../services/authService";
+import Error from "../components/Error";
 
 const Signup = () => {
     const navigate = useNavigate();
+    const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         password: "",
         role: "",
-        phone: ""
+        phoneNo: ""
     });
 
     const handleOnChange = (e) => {
@@ -19,15 +21,19 @@ const Signup = () => {
 
     const handleOnSubmit = async (e) => {
         e.preventDefault();
-        console.log("Signup form: ", formData);
-        const isFormSubmitted = await createUser(formData);
-        if(isFormSubmitted){
+        try{
+            const isFormSubmitted = await signupUser(formData);
             console.log("Form Submitted")
             navigate("/login");
-        }else{
-            console.error("Error creating user");
+        }catch(error){
+            setError(error.message || "An unknown error occurred");
+            // console.error("Error creating user: ", error.message);
         }
     };
+
+    useEffect(() => {
+
+    }, [error]);
 
     return (
         <div className="py-10 bg-gray-100 flex items-center justify-center p-4">
@@ -74,13 +80,13 @@ const Signup = () => {
                     {/* Phone */}
                     <div className="mb-5">
                         <label
-                            htmlFor="phone"
+                            htmlFor="phoneNo"
                             className="block text-sm font-medium text-gray-700 mb-1 text-left">Phone</label>
                         <input
                             type="number"
-                            id="phone"
-                            name="phone"
-                            value={formData.phone}
+                            id="phoneNo"
+                            name="phoneNo"
+                            value={formData.phoneNo}
                             onChange={handleOnChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                             placeholder="9876543210"
@@ -102,8 +108,8 @@ const Signup = () => {
                             className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
                             <option value="" disabled selected>Select</option>
                             <option value="Admin">Admin</option>
-                            <option value="Guest Admin">Guest Admin</option>
-                            <option value="User">User</option>
+                            <option value="GuestAdmin">Guest Admin</option>
+                            <option value="Guest">User</option>
                         </select>
                     </div>
 
@@ -122,6 +128,9 @@ const Signup = () => {
                             placeholder="••••••••"
                         />
                     </div>
+
+                    {/*Error Display*/}
+                    {error && <Error error={error} />}
 
                     <button
                         type="submit"

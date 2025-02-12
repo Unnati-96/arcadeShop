@@ -13,17 +13,37 @@ import Landing from "./pages/Landing";
 import Signup from "./pages/Signup";
 import EditUser from "./pages/EditUser";
 import EditDevice from "./pages/EditDevice";
+import Billing from "./pages/Billing";
+import History from "./pages/History";
+import {ArcadeContext, ArcadeProvider} from "./context/ArcadeContext";
+import {useContext, useEffect, useState} from "react";
+// import Pricing from "./pages/Pricing";
 
 function App() {
     return (
+
+    <ArcadeProvider>
         <BrowserRouter>
             <LocationAwareApp />
         </BrowserRouter>
+
+    </ArcadeProvider>
     );
 }
 
 function LocationAwareApp() {
-    const location = useLocation();  // useLocation can now be used here safely
+    const location = useLocation();
+    const {isLoggedIn, setIsLoggedIn} = useContext(ArcadeContext);
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        const fetch = () => {
+            const userInfo = localStorage.getItem('user');
+            if(userInfo){
+                setCurrentUser(userInfo);
+            }
+        }
+    }, [currentUser]);
 
     return (
         <>
@@ -32,21 +52,25 @@ function LocationAwareApp() {
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                {/*<Route path='/pricing' element={<Pricing />} />*/}
             </Routes>
 
             {/* Show Sidebar for paths other than "/" and "/login" or "/signup" */}
-            {!(location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup") && (
+            {
+                isLoggedIn
+                // !(location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup")
+                && (
                 <div className="flex w-full">
                     <Sidebar />
                     <Routes>
+                        {/*<Route path='/users/pricing' element={<Pricing />} />*/}
                         <Route path="/user/add" element={<AddUser />} />
                         <Route path="/user/view" element={<ViewUsers />} />
-                        {/*<Route path="/user/update" element={<EditUser />} />*/}
                         <Route path="/device/add" element={<AddDevice />} />
                         <Route path="/device/view" element={<ViewDevices />} />
-                        {/*<Route path="/device/update" element={<EditDevice />} />*/}
-                        <Route path="/inventory/booking" element={<IssueDevice />} />
-                        <Route path="/inventory/history" element={<ViewUsers />} />
+                        <Route path="/inventory/billing" element={<Billing />} />
+                        <Route path="/inventory/issue-device" element={<IssueDevice />} />
+                        <Route path="/inventory/history" element={<History />} />
                     </Routes>
                 </div>
             )}

@@ -1,42 +1,76 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import ResetButton from "../components/ResetButton";
 import SubmitButton from "../components/SubmitButton";
 import Heading from "../components/Heading";
-import {AiFillDelete} from "react-icons/ai";
+import { AiFillDelete } from "react-icons/ai";
 import AddUserForm from "../components/AddUserForm";
 import EditModal from "../components/EditModal";
 import FindUser from "./FindUser";
+import { addUser } from "../services/userService";
+import { getDevice } from "../services/deviceService";
+import { bookDevice } from "../services/bookingService";
+import { useNavigate, useLocation } from "react-router-dom";
+import Error from "../components/Error";
 
 const IssueDevice = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const [addUserModal, setAddUserModal] = useState(false);
     const [findUserModal, setFindUserModal] = useState(false);
-
+    const [device, setDevice] = useState([]);
     const [user, setUser] = useState([]);
+    // const [userId, setUserId] = useState([])
+    const [error, setError] = useState(null);
 
     const [userFormData, setUserFormData] = useState({
         name: "",
         email: "",
         phone: "",
-        role: "User",
+        role: "Guest",
         password: "Password",
     });
 
     const [formData, setFormData] = useState({
         groupName: "",
         systemId: "",
-        users: [...user],
+        users: [],
+        // userData: [],
         entryTime: "",
         exitTime: "",
-        duration: "",
+        rate: "",
     });
 
-    const handleUserDataSubmit = (submittedData) => {
-        // handle add new user
-        let updateUser = [...user];
-        updateUser.push(submittedData);
-        setUser(updateUser);
-        console.log("User data after adding user: ", user);
-        console.log("New Use Added data: ", submittedData);
+    const [addedUsers, setAddeduser] = useState(formData.usersData);
+
+    const handleAddedUsers = (u) => {
+        setAddeduser(u);
+    };
+
+    const getDeviceList = async () => {
+        try {
+            const filters = {"isAvailable": true}
+            const deviceList = await getDevice(filters);
+            setDevice(deviceList);
+            setAddUserModal(false);
+        } catch (error) {
+            console.error("Error: ", error.message);
+        }
+    };
+
+    const handleUserDataSubmit = async (submittedData) => {
+        try {
+            const newuser = await addUser(submittedData);
+            let updateUser = [...user]
+            updateUser.push(submittedData);
+            setUser(updateUser);
+
+            // let updatedUserId = [...userId]
+            // updatedUserId.push(submittedData._id)
+            // setUserId(updatedUserId);
+        } catch (error) {
+            console.error("Error:", error.message);
+        }
     };
 
     const handleChange = (e) => {
@@ -47,14 +81,66 @@ const IssueDevice = () => {
         });
     };
 
-    const handleSaveUser = (newUser) => {
-        setUser([...user, ...newUser]);
+    const handleDeviceChange = (e) => {
+        const selectedDevice = device.find(d => d.systemId === e.target.value);
+        if (selectedDevice) {
+            setFormData({
+                ...formData,
+                systemId: selectedDevice.systemId,
+                rate: selectedDevice.pricePerHour,
+            });
+        }
     };
 
-    const handleSubmit = (e) => {
+    const handleSaveUser = (newUser) => {
+        const filteredNewUsers = newUser.filter(newU =>
+            !user.some(existingUser => existingUser.email === newU.email)
+        );
+        setUser(prevUserList => [...prevUserList, ...filteredNewUsers]);
+
+        // const newUsersIds = filteredNewUsers.map(newU => newU._id);
+        // setUserId(prev => [...prev, ...newUsersIds]);
+
+    };
+
+    const generateBillData = (billData) => {
+        const entry = new Date(billData.entryTime);
+        const exit = new Date(billData.exitTime);
+        const duration = parseFloat(((exit - entry) / (1000 * 60 * 60)).toFixed(2)) || 0;
+        const total = parseFloat((billData.rate * duration * billData.users.length).toFixed(2)) || 0.00;
+
+        // Create a newBill object
+        const newBill = {
+            date: new Date().toLocaleDateString(),
+            billedBy: JSON.parse(localStorage.getItem('user')).name,
+            bookingId: "",
+            groupName: billData.groupName,
+            systemId: billData.systemId,
+            rate: billData.rate,
+            users: billData.users,
+            duration: duration,
+            price: total,
+        };
+        return newBill;
+    }
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle form submission logic
-        console.log("Form submitted with data:", formData);
+        try {
+
+            const updatedFormData = {
+                ...formData,
+                users: [...user],
+                // userData: [...user]
+            };
+
+            const getBillData = generateBillData(updatedFormData);
+
+            navigate("/inventory/billing", { state: { updatedFormData, getBillData } });
+        } catch (error) {
+            // console.error("Error:", error.message);
+            setError(error.message || "An unknown error occurred");
+        }
     };
 
     const handleReset = () => {
@@ -62,27 +148,41 @@ const IssueDevice = () => {
             groupName: "",
             systemId: "",
             users: [],
+            userData: [],
             entryTime: "",
             exitTime: "",
-            duration: "",
+            rate: "",
         });
     };
-    // ===============================================================================================
-    const handelDeleteUser = (duser) => {
+
+    const handelRemoveUser = (duser) => {
         let updatedUsers = user;
-        updatedUsers.filter( (u) => u === duser);
-        // setFormData(prevFormData => ({
-        //     ...prevFormData,
-        //     users: updatedUsers
-        // }));
+        updatedUsers = updatedUsers.filter((u) => u !== duser);
         setUser(updatedUsers);
-        console.log(user);
+
+        // let updatedIds = updatedUsers.map(u => u._id);
+        // setUserId(updatedIds);
+        // console.log(user);
     };
 
-    useEffect(() => {},[formData.users])
+    const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user')));
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setCurrentUser(JSON.parse(localStorage.getItem('user')));
+        }
+        getDeviceList();
+
+        const storedData = location.state?.formData;
+        if (storedData) {
+            setFormData(storedData);
+        }
+    }, [formData.users, user,  location.state, formData, error]);
+
     return (
         <div className="w-[60vw] p-6 ">
             <Heading title="Issue Device" />
+            {/*<p>Current user testing: {currentUser}</p>*/}
             <form className="my-10 ml-32" onSubmit={handleSubmit}>
                 {/* Group Name & System ID */}
                 <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -97,6 +197,7 @@ const IssueDevice = () => {
                             placeholder="XG Gamer"
                             onChange={handleChange}
                             value={formData.groupName}
+                            required
                         />
                     </div>
 
@@ -107,15 +208,30 @@ const IssueDevice = () => {
                         <select
                             name="systemId"
                             className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                            onChange={handleChange}
+                            onChange={handleDeviceChange} // Handle the device selection change
                             value={formData.systemId}
+                            required
                         >
                             <option value="" disabled>Select</option>
-                            <option value="S12-PS5">S12-PS5</option>
-                            <option value="S11-VR-3">S11-VR</option>
-                            <option value="S05-VR">S05-VR</option>
+                            {device.map((d) => (
+                                <option key={d._id} value={d.systemId}>{d.systemId}</option>
+                            ))}
                         </select>
                     </div>
+                </div>
+
+                {/* Rate Input (based on selected device) */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+                        Rate (Per Hour)
+                    </label>
+                    <input
+                        type="text"
+                        name="rate"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                        value={formData.rate}
+                        readOnly // Make the rate field read-only since it's populated from the device
+                    />
                 </div>
 
                 {/* User Selection */}
@@ -125,15 +241,16 @@ const IssueDevice = () => {
                     </label>
                     <table className="w-full">
                         <tbody>
-                            { user.map((usr, index) => (
-                                <tr className="border-b flex items-center w-full" key={index}>
-                                    <td className="px-8 py-3">{index+1} </td>
-                                    <td className="px-8 py-3 w-1/4">{usr.name}</td>
-                                    <td className="px-10 py-3 w-2/4">{usr.email}</td>
-                                    {/* delete button not working =========================*/}
-                                    <td className="px-8 py-3 hover:cursor-pointer hover:text-red-500"><AiFillDelete onClick={() => handelDeleteUser(usr)}/></td>
-                                </tr>
-                            )) }
+                        {user.map((usr, index) => (
+                            <tr className="border-b flex items-center w-full" key={index}>
+                                <td className="px-8 py-3">{index + 1}</td>
+                                <td className="px-8 py-3 w-1/4">{usr.name}</td>
+                                <td className="px-10 py-3 w-2/4">{usr.email}</td>
+                                <td className="px-8 py-3 hover:cursor-pointer hover:text-red-500">
+                                    <AiFillDelete onClick={() => handelRemoveUser(usr)} />
+                                </td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                     <div className="mt-5 flex items-center justify-around text-blue-600">
@@ -171,26 +288,9 @@ const IssueDevice = () => {
                     </div>
                 </div>
 
-                {/* OR Section */}
-                <div className=" text-center">OR</div>
+                {error && <Error error={error} />}
 
-                {/* Duration */}
-                <div className="mb-6 flex items-center justify-center">
-                    <div className="w-[48%]">
-                        <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
-                            Duration
-                        </label>
-                        <input
-                            type="time"
-                            name="duration"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                            onChange={handleChange}
-                            value={formData.duration}
-                        />
-                    </div>
-                </div>
-
-                {/*Buttons*/}
+                {/* Buttons */}
                 <div className="mt-10 flex items-center justify-center space-x-10">
                     <ResetButton onReset={handleReset} />
                     <SubmitButton text="Proceed"/>
@@ -200,13 +300,12 @@ const IssueDevice = () => {
             {/* Modal */}
             {addUserModal && (
                 <>
-                    {/* Overlay background to disable background interaction */}
                     <div className="fixed inset-0 bg-gray-800 opacity-50 z-50"></div>
-
-                    <EditModal onClose={() => setAddUserModal(false)} >
+                    <EditModal onClose={() => setAddUserModal(false)}>
                         <Heading title="Add User Details" />
                         <AddUserForm initialData={userFormData} onSubmit={handleUserDataSubmit} disabledInput={["role"]}>
                             <ResetButton text="Cancel" onReset={() => setAddUserModal(false)} />
+                            {error && <Error error={error} />}
                         </AddUserForm>
                     </EditModal>
                 </>
@@ -214,12 +313,11 @@ const IssueDevice = () => {
 
             {findUserModal && (
                 <>
-                    {/* Overlay background to disable background interaction */}
                     <div className="fixed inset-0 bg-gray-800 opacity-50 z-50"></div>
                     <EditModal onClose={() => setFindUserModal(false)} >
                         <Heading title="Select User" />
-                        {/* code for select user modal content */}
-                        <FindUser onClose={handleSaveUser} />
+                        {error && <Error error={error} />}
+                        <FindUser onClose={handleSaveUser} handleAddedUsers={handleAddedUsers} selectdUsers={user}/>
                     </EditModal>
                 </>
             )}
