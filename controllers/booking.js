@@ -16,18 +16,11 @@ export const createBooking = async (req, res, next) => {
   //   return next(errorHandler(400, "Device already Booked!!"));
   // }
 
-  // const overlappingBookings = await booking.find({
-  //   systemId,
-  //   $or: [
-  //     { entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } }
-  //   ]
-  // });
-
-  
   const overlappingBookings = await booking.find({
     systemId,
-      entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } 
-    
+    $or: [
+      { entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } }
+    ]
   });
 
   if (overlappingBookings.length > 0) {
@@ -37,8 +30,9 @@ export const createBooking = async (req, res, next) => {
 
   const multipledevice = await booking.find({
     users: { $in: req.body.users },
-  entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } 
-    
+    $or: [
+      { entryTime: { $lte: req.body.exitTime }, exitTime: { $gte: req.body.entryTime } }
+    ]
   });
 
   if (multipledevice.length > 0) {
@@ -47,25 +41,35 @@ export const createBooking = async (req, res, next) => {
 
   const newBooking = new booking({ groupName, systemId, users, entryTime, exitTime });
 
-  try { 
+  try {
     const savedBooking = await newBooking.save();
 
     const st = new Date(req.body.entryTime);
     const end = new Date(req.body.exitTime);
-    const duration = end - st; // Duration in milliseconds
 
     async function updateDeviceStatus() {
+      const deviceStatus = await device.findOne({ systemId });
     
-      await device.updateOne({ systemId }, { $set: { isAvailable: false } });
-      console.log(`Device ${systemId} booked and status updated to unavailable.`);
-
+      if (deviceStatus.isAvailable) {
+        await device.updateOne({ systemId }, { $set: { isAvailable: false } });
+        console.log(`Device ${systemId} booked and status updated to unavailable.`);
+      }
+    
+      const duration = end - st; // Duration in milliseconds
+    
     
       setTimeout(async () => {
-        await device.updateOne({ systemId }, { $set: { isAvailable: true } });
-        console.log(`Device ${systemId} is now available.`);
+        const deviceStatusAfterTimeout = await device.findOne({ systemId });
+        
+        
+        if (!deviceStatusAfterTimeout.isAvailable) {
+          await device.updateOne({ systemId }, { $set: { isAvailable: true } });
+          console.log(`Device ${systemId} is now available.`);
+        }
       }, duration);
     }
 
+ 
    
     const entryTimeDiff = st.getTime() - new Date().getTime();
     setTimeout(updateDeviceStatus, entryTimeDiff); 
