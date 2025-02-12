@@ -10,7 +10,6 @@ const bookingId =req.body.bookingId;
 const role= req.user.role;
 try {
    const validBooking = await booking.findById(bookingId);
-//    const issuer = await user.findById();
    const billedBy = role;
 console.log(role);
    const tim= validBooking.entryTime.toISOString();

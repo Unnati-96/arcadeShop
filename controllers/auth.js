@@ -29,6 +29,10 @@ export const signinUser = async (req,res,next) =>{
         {
           return next(errorHandler(404,"User not found!!"));    
         }
+        if(role !== validUser.role)
+            {
+                return next(errorHandler(404,"Unauthorised,SignIn as Guest!!"));
+            }
 
         if(role=== "Guest")
         {  
@@ -38,16 +42,13 @@ export const signinUser = async (req,res,next) =>{
                return next(errorHandler(401,"Wrong Credentials!!"));
             }
         }
-        const correctpass = await user.findOne({password});
-        if(!correctpass)
-        {
-            return next(errorHandler(401,"Wrong Credentials!!"));
+        else{
+            if(password !== validUser.password)
+            {
+                return next(errorHandler(401,"Wrong Credentials!!"))
+            }
         }
-        
-        if(role !== validUser.role)
-        {
-            return next(errorHandler(404,"Unauthorised,SignIn as Guest!!"));
-        }
+      
      const token = jwt.sign({id:validUser._id,role:validUser.role},process.env.SECRET_KEY);
      const {password:pass,...rest} = validUser._doc;
     return res.cookie("access_token",token,{httpOnly:true,secure:true, sameSite: 'None'}).status(200).json(rest);
