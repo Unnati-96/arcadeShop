@@ -99,10 +99,25 @@ import booking from "../models/booking.js";
 import device from "../models/device.js";
 import { errorHandler } from "../utils/error.js";
 // import user from "../models/user.js";
+
+// import user from "../models/user.js";
 export const generateBill = async (req,res,next)=>{
 const bookingId =req.body.bookingId;
 const role= req.user.role;
 try {
+//    const validBooking = await booking.findById(bookingId);
+//    const billedBy = role;
+// console.log(role);
+
+
+const validBooking = await booking.findById(bookingId).populate({
+    path: "users",  // Populate the 'users' field with the user model data
+    select: "name email"  // Only select the 'name' and 'email' fields of the users
+  });
+  const billedBy = role;
+    console.log(role);
+
+
 //    const validBooking = await booking.findById(bookingId);
 //    const billedBy = role;
 // console.log(role);
@@ -120,6 +135,21 @@ const validBooking = await booking.findById(bookingId).populate({
    const rate = system.pricePerHour;
    const price = rate * duration;
    const groupName = validBooking.groupName;
+
+   const newBill = new Bill({
+    bookingId,
+    systemId,
+    price,
+    date,
+    billedBy,
+    rate,
+    duration,
+    groupName,
+    users: validBooking.users  // Store user details in the bill if needed
+  });
+
+
+//    const newBill = new Bill({bookingId,systemId,price,date,billedBy,rate,duration,groupName});
    const newBill = new Bill({
     bookingId,
     systemId,
@@ -138,13 +168,37 @@ const validBooking = await booking.findById(bookingId).populate({
     ...savedBill.toObject(),
     users: validBooking.users  // Explicitly include users in the response
   }});
+   return res.status(200).json({"BillId":savedBill._id,  "Details": {
+    ...savedBill.toObject(),
+    users: validBooking.users  // Explicitly include users in the response
+  }});
 } catch (error) {
     next(error);
 }
 }
+
+
+
+
+
+export const getBill = async (req, res, next) => {
+    const { billId, bookingId, users } = req.query;
 export const getBill = async (req, res, next) => {
     const { billId, bookingId, users } = req.query;
     let filter = {};
+  
+    // Check for valid billId in the query string
+    if (billId && billId.trim() !== "") {
+      if (mongoose.Types.ObjectId.isValid(billId)) {
+        filter._id = billId;
+      } else {
+        return next(errorHandler(404, "Invalid BillId!!"));
+      }
+    }
+  
+    // Check for valid bookingId in the query string
+    if (bookingId && bookingId.trim() !== "") {
+      if (mongoose.Types.ObjectId.isValid(bookingId)) {
     // Check for valid billId in the query string
     if (billId && billId.trim() !== "") {
       if (mongoose.Types.ObjectId.isValid(billId)) {
@@ -161,6 +215,16 @@ export const getBill = async (req, res, next) => {
         return next(errorHandler(400, "Invalid BookingId!!"));
       }
     }
+  
+    // Check for users query and filter by users' name
+    if (users && users.trim() !== "") {
+      filter["users.name"] = { $regex: users, $options: "i" }; // Case-insensitive search
+    }
+  
+      } else {
+        return next(errorHandler(400, "Invalid BookingId!!"));
+      }
+    }
     // Check for users query and filter by users' name
     if (users && users.trim() !== "") {
       filter["users.name"] = { $regex: users, $options: "i" }; // Case-insensitive search
@@ -170,9 +234,24 @@ export const getBill = async (req, res, next) => {
         path: "users", // Populate the 'users' field with the user model data
         select: "name email" // Select only 'name' and 'email' of the users
       });
+  
+      // If no filters, return all bills
+      if (Object.keys(filter).length === 0) {
+      const data = await Bill.find(filter).populate({
+        path: "users", // Populate the 'users' field with the user model data
+        select: "name email" // Select only 'name' and 'email' of the users
+      });
       // If no filters, return all bills
       if (Object.keys(filter).length === 0) {
         return res.status(200).json(data);
+      }
+  
+      // If no data is found
+      if (data.length === 0) {
+        return next(errorHandler(404, "Bill Not Found!!"));
+      }
+  
+      return res.status(200).json(data); // Return the filtered bills
       }
       // If no data is found
       if (data.length === 0) {
@@ -182,5 +261,10 @@ export const getBill = async (req, res, next) => {
       return res.status(200).json(data); // Return the filtered bills
     } catch (error) {
       next(error);
+      next(error);
     }
+  };
+  
+
+
   };

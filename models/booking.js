@@ -62,6 +62,7 @@ const bookingSchema = new mongoose.Schema({
     users:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"user",
+        ref:"user",
         required:true,
     }],
     entryTime:{
