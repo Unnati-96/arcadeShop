@@ -13,21 +13,10 @@ const bookingSchema = new mongoose.Schema({
     },
     users:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"user",
+        // ref:"user",
         required:true,
-    //    index:{ unique:true}
         
     }],
-    // deviceId:{
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref:"device",
-    //     required:true, 
-        
-    // },
-    // duration:{
-    //     type:Number,
-    //     required:true
-    // },
     entryTime:{
         type:Date
     }, 
@@ -40,3 +29,14 @@ const bookingSchema = new mongoose.Schema({
 
 const booking = mongoose.model("booking",bookingSchema);
 export default booking;
+
+  // deviceId:{
+    //     type:mongoose.Schema.Types.ObjectId,
+    //     ref:"device",
+    //     required:true, 
+        
+    // },
+    // duration:{
+    //     type:Number,
+    //     required:true
+    // },

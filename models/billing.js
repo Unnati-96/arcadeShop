@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import user from "./user.js";
 
 const billSchema = new mongoose.Schema({
     bookingId:{
@@ -15,8 +16,22 @@ const billSchema = new mongoose.Schema({
     },
     date:
     {
+        type:String,
+    },
+    billedBy:{
+     type:String,
+    },
+    rate:{
+        type:Number
+    },
+    duration:
+    {
+        type:Number
+    }, 
+    groupName:
+    {
         type:String
-    }
+    },
     
 }) ;
 const billModel = mongoose.model("bill",billSchema);

@@ -38,6 +38,11 @@ export const signinUser = async (req,res,next) =>{
                return next(errorHandler(401,"Wrong Credentials!!"));
             }
         }
+        const correctpass = await user.findOne({password});
+        if(!correctpass)
+        {
+            return next(errorHandler(401,"Wrong Credentials!!"));
+        }
         
         if(role !== validUser.role)
         {

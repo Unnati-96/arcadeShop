@@ -13,7 +13,7 @@ export const verifyUser = (req,res,next)=>{
         {
             return next(errorHandler(403,"Unauthorized!!"));
         }
-       req.user= user;
+       req.user= user; //for role 
        console.log(user);
         next();
      })
@@ -29,7 +29,7 @@ export const roleCheck = (allowedRoles)=>{
     {
     return next(errorHandler(403,"Unauthorized!!"))
     }
-    
+   //  req.user= user; 
       next();
    }
 }

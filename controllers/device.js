@@ -54,7 +54,7 @@ export const delDevice = async (req,res,next)=>{
 }
 
 export const searchDevice = async (req,res,next)=>{
-    const {deviceType,systemId} = req.query;
+    const {deviceType,systemId,isAvailable} = req.query;
     let filter = {};
     if(deviceType && deviceType.trim() !== "")
     {
@@ -65,16 +65,22 @@ export const searchDevice = async (req,res,next)=>{
        
             filter.systemId = systemId;
     }
-    try {
+    if(isAvailable&& isAvailable.trim() !== "")
+     {
+        filter.systemId = systemId;
+     }
+
+    try
+     {
        const data = await device.find(filter);
        if(Object.keys(filter).length === 0)
         {
             return res.status(200).json(data);
         }
-       if(data.length ===0)
-        {
-          return next(errorHandler(404,"Device not found!!"));
-        } 
+    //    if(data.length ===0)
+    //     {
+    //       return next(errorHandler(404,"Device not found!!"));
+    //     } 
        return res.status(200).json(data);
     } catch (error) {
         next(error);

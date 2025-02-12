@@ -40,6 +40,7 @@ export const createBooking = async (req, res, next) => {
   }
 
   const newBooking = new booking({ groupName, systemId, users, entryTime, exitTime });
+  
 
   try {
     const savedBooking = await newBooking.save();
@@ -68,9 +69,6 @@ export const createBooking = async (req, res, next) => {
         }
       }, duration);
     }
-
- 
-   
     const entryTimeDiff = st.getTime() - new Date().getTime();
     setTimeout(updateDeviceStatus, entryTimeDiff); 
 
