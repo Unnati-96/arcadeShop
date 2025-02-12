@@ -79,53 +79,80 @@ export const createBooking = async (req, res, next) => {
 };
 
 
-export const bookingHistory =  async (req,res,next)=>{
-    const {systemId,users,date} = req.query;
-    try {
-    let filter ={};
-        if(systemId && systemId.trim() !== "")
-        {
-            filter.systemId= systemId;
-        }
-        if(users && users !== "")
-        {
-            if(mongoose.Types.ObjectId.isValid(users))
-            {
-                filter.users=users;
 
-            }
-            else{
-                next(errorHandler(400,"Invalid Id format!!"))
-            }
-        }
-        if(date && date.trim() !== "")
-        {
-              // If a date is provided, calculate the start and end of the day in UTC
-       
-            const searchDate = new Date(date);
-            const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));  // 00:00:00 UTC of the given date
-            const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));  // 23:59:59.999 UTC of the given date
+export const bookingHistory = async (req, res, next) => {
+  const { systemId, users, date } = req.query;
+  try {
+      let filter = {};
 
-            // Add date range filter to the query
-            filter.$or = [
-                { entryTime: { $gte: startOfDay, $lte: endOfDay } },
-                { exitTime: { $gte: startOfDay, $lte: endOfDay } }
-            ];
-        }
-        const data = await booking.find(filter);
-        if(Object.keys(filter).length ===0)
-        {
-             return res.status(200).json(data);
-        }
-        if(data.length===0)
-        {
-            return next(errorHandler(404,"Booking not found!!"));
-        }
+      if (systemId && systemId.trim() !== "") {
+          filter.systemId = systemId;
+      }
 
-    return res.status(200).json(data);
+    
+      // If date is provided, calculate the start and end of the day in UTC
+      if (date && date.trim() !== "") {
+          const searchDate = new Date(date);
+          const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));  // 00:00:00 UTC
+          const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));  // 23:59:59.999 UTC
 
-    } catch (error) {
-        next(error);
-    }
+          // Add date range filter to the query
+          filter.$or = [
+              { entryTime: { $gte: startOfDay, $lte: endOfDay } },
+              { exitTime: { $gte: startOfDay, $lte: endOfDay } }
+          ];
+      }
 
-}
+      const data = await booking.find(filter).populate({
+          path: "users",  // Populate 'users' field with user data
+          select: "name"  // Only select 'name' field from the User model
+      });
+
+      // Filter data by user's name if users query parameter is provided
+      if (users && users.trim() !== "") {
+          const filteredData = data.filter(booking => {
+              return booking.users.some(user => 
+                  user.name.toLowerCase().includes(users.toLowerCase()) // Case-insensitive search
+              );
+          });
+
+          if (filteredData.length === 0) {
+              return next(errorHandler(404, "No bookings found for the specified user name"));
+          }
+
+          return res.status(200).json(filteredData);
+      }
+
+      // If no filtering by user, proceed with the original data
+      if (data.length === 0) {
+          return next(errorHandler(404, "Booking not found!!"));
+      }
+
+      // Modify the response data to include duration, price, and booking date
+      const responseData = data.map(booking => {
+          // Calculate duration (in minutes, for example)
+          const duration = booking.exitTime && booking.entryTime ? 
+              (new Date(booking.exitTime) - new Date(booking.entryTime)) / (1000 * 60) : 0;
+
+          // Assuming 'price' is a field in your booking model
+          const price = booking.price || 0; // Default to 0 if not present
+
+          // Assuming 'entryTime' is the booking date
+          const bookingDate = booking.entryTime ? new Date(booking.entryTime).toISOString() : null;
+
+          return {
+              ...booking.toObject(), // Convert Mongoose document to plain object
+              duration,  // Duration in minutes 
+              price,     // Price of the booking
+              bookingDate // Date of booking
+          };
+      });
+
+      return res.status(200).json(responseData);
+  } catch (error) {
+      next(error);
+  }
+};
+
+
+

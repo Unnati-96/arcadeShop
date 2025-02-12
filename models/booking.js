@@ -1,4 +1,5 @@
 import mongoose from"mongoose";
+// import user from "./user.js";
 
 const bookingSchema = new mongoose.Schema({
     groupName:{
@@ -13,10 +14,17 @@ const bookingSchema = new mongoose.Schema({
     },
     users:[{
         type:mongoose.Schema.Types.ObjectId,
-        // ref:"user",
+        ref:"user",
         required:true,
         
     }],
+
+    // users:[
+    //     {
+    //         type:user.schema,
+    //         required:true,
+    //     }
+    // ],
     entryTime:{
         type:Date
     }, 
