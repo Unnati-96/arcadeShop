@@ -4,16 +4,16 @@ import user from "../models/user.js";
 import { errorHandler } from "../utils/error.js";
 export const addUser =  async (req,res,next)=>{
     try {
-        const {password} = req.body;
-    const hashedPassword =  bcryptjs.hashSync(password,10);
-    const newUser = {
-        ...req.body,
-        password: hashedPassword,
-    }
-    console.log("New User: ", newUser)
-    const data = await user.create(newUser);
+    //     const {password} = req.body;
+    // const hashedPassword =  bcryptjs.hashSync(password,10);
+    // const newUser = {
+    //     ...req.body,
+    //     password: hashedPassword,
+    // }
+    // console.log("New User: ", newUser)
+    const data = await user.create(req.body);
     console.log(data);
-    res.status(201).json("User created successfully!!");
+    res.status(201).json({message: "User created successfully!!", data: data});
     } catch (error) {
         console.log(error);
        next(error);
