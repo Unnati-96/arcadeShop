@@ -22,6 +22,7 @@ const Sidebar = () => {
         </div>
         <hr className="border-gray-600 mb-4"/>
         <ul className="space-y-4">
+
             {currentUser && (currentUser['role'] === 'Admin' || currentUser['role'] === 'GuestAdmin') &&
                 <li>
                     <a href="/device/view" className={`flex items-center space-x-2 text-sm hover:bg-teal-500 py-2 px-4 rounded-md
@@ -71,6 +72,7 @@ const Sidebar = () => {
                     </a>
                 </li>
             }
+
 
             {currentUser && (currentUser['role'] === 'Admin') &&
                 <li>

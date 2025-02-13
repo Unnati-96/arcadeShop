@@ -1,8 +1,12 @@
 import { FaArrowRight, FaQuestionCircle } from 'react-icons/fa';
 import image from '../images/landingPage.jpg';
+import { ArcadeContext } from '../context/ArcadeContext';
+import {useContext} from 'react';
 
 
 const Landing = () => {
+    const {setIsLoggedIn} = useContext(ArcadeContext)
+    setIsLoggedIn(false);
     return (
         <section className="py-24 bg-white">
             <div className="px-12 mx-auto max-w-7xl">
