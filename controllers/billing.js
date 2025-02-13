@@ -88,10 +88,12 @@ export const getBill = async (req, res, next) => {
     }
   
     try {
-      const data = await Bill.find(filter).populate({
-        path: "users", // Populate the 'users' field with the user model data
-        select: "name email" // Select only 'name' and 'email' of the users
-      });
+    //   const data = await Bill.find(filter).populate({
+    //     path: "users", // Populate the 'users' field with the user model data
+    //     select: "name email" // Select only 'name' and 'email' of the users
+    //   });
+
+    const data = await Bill.find(filter);
   
       // If no filters, return all bills
       if (Object.keys(filter).length === 0) {
