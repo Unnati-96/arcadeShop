@@ -30,9 +30,12 @@ const Login = () => {
                 if (storedUser) {
                     setCurrentUser(storedUser);
                 }
-
                 setIsLoggedIn(true);
-                navigate('/device/view');
+                // if(currentUser['role'] === 'Guest'){
+                //     navigate('/no-access');
+                // }else {
+                    navigate('/device/view');
+                // }
             }
         } catch (error) {
             setError(error.message || "An unknown error occurred");
@@ -83,7 +86,7 @@ const Login = () => {
                             <option value="" disabled>Select</option>
                             <option value="Admin">Admin</option>
                             <option value="GuestAdmin">Guest Admin</option>
-                            <option value="Guest">User</option>
+                            <option value="Guest">Guest</option>
                         </select>
                     </div>
 

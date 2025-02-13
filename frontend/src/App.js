@@ -17,6 +17,7 @@ import Billing from "./pages/Billing";
 import History from "./pages/History";
 import {ArcadeContext, ArcadeProvider} from "./context/ArcadeContext";
 import {useContext, useEffect, useState} from "react";
+import NoAccess from "./components/NoAccess";
 // import Pricing from "./pages/Pricing";
 
 function App() {
@@ -52,12 +53,12 @@ function LocationAwareApp() {
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
-                {/*<Route path='/pricing' element={<Pricing />} />*/}
+                <Route path='/no-access' element={<NoAccess />} />
             </Routes>
 
             {/* Show Sidebar for paths other than "/" and "/login" or "/signup" */}
             {
-                isLoggedIn
+                (isLoggedIn)
                 // !(location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup")
                 && (
                 <div className="flex w-full">

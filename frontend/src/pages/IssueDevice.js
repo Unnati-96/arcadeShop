@@ -20,7 +20,6 @@ const IssueDevice = () => {
     const [findUserModal, setFindUserModal] = useState(false);
     const [device, setDevice] = useState([]);
     const [user, setUser] = useState([]);
-    // const [userId, setUserId] = useState([])
     const [error, setError] = useState(null);
 
     const [userFormData, setUserFormData] = useState({
@@ -35,7 +34,6 @@ const IssueDevice = () => {
         groupName: "",
         systemId: "",
         users: [],
-        // userData: [],
         entryTime: "",
         exitTime: "",
         rate: "",
@@ -61,8 +59,9 @@ const IssueDevice = () => {
     const handleUserDataSubmit = async (submittedData) => {
         try {
             const newuser = await addUser(submittedData);
+            console.log(newuser.data);
             let updateUser = [...user]
-            updateUser.push(submittedData);
+            updateUser.push(newuser.data);
             setUser(updateUser);
 
             // let updatedUserId = [...userId]
@@ -98,9 +97,6 @@ const IssueDevice = () => {
         );
         setUser(prevUserList => [...prevUserList, ...filteredNewUsers]);
 
-        // const newUsersIds = filteredNewUsers.map(newU => newU._id);
-        // setUserId(prev => [...prev, ...newUsersIds]);
-
     };
 
     const generateBillData = (billData) => {
@@ -131,9 +127,8 @@ const IssueDevice = () => {
             const updatedFormData = {
                 ...formData,
                 users: [...user],
-                // userData: [...user]
             };
-
+            console.log(updatedFormData.users);
             const getBillData = generateBillData(updatedFormData);
 
             navigate("/inventory/billing", { state: { updatedFormData, getBillData } });

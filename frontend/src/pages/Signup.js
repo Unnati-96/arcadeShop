@@ -109,7 +109,7 @@ const Signup = () => {
                             <option value="" disabled selected>Select</option>
                             <option value="Admin">Admin</option>
                             <option value="GuestAdmin">Guest Admin</option>
-                            <option value="Guest">User</option>
+                            <option value="Guest">Guest</option>
                         </select>
                     </div>
 

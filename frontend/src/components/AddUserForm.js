@@ -127,7 +127,7 @@ const AddUserForm = ({ initialData, onSubmit, onReset, disabledInput, children }
                     <option value="" disabled>
                         Select
                     </option>
-                    <option value="Guest">User</option>
+                    <option value="Guest">Guest</option>
                     <option value="Admin">Admin</option>
                     <option value="GuestAdmin">Guest Admin</option>
                 </select>
