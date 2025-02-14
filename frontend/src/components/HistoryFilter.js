@@ -1,10 +1,7 @@
 import SubmitButton from "./SubmitButton";
 import React, {useEffect, useState} from "react";
-import {getUser} from "../services/userService";
-import {getBills} from "../services/billingService";
 import {getDevice} from "../services/deviceService";
 import Error from "./Error";
-import {getBookingHistory} from "../services/bookingService";
 
 const HistoryFilters = ({onFilteredHistory}) => {
     const [device, setDevice] = useState([]);
@@ -34,15 +31,16 @@ const HistoryFilters = ({onFilteredHistory}) => {
     const handleApplyFilter = async (e) => {
         e.preventDefault();
         try{
-            onFilteredHistory(filterFormData);
+            await onFilteredHistory(filterFormData);
         }
         catch(error){
+            console.log("Error : ", error)
             setError(error.message);
         }
     };
 
     useEffect(() => {
-
+        getDeviceList();
     }, [ error]);
 
     return (
@@ -102,10 +100,10 @@ const HistoryFilters = ({onFilteredHistory}) => {
                     <SubmitButton text="Apply" />
                 </div>
             </form>
-
+            
+            {/*    Error*/}
+            {error && <Error error={error} />}
         </div>
-    {/*    Error*/}
-    {error && <Error error={error} />}
     </>
     )
 }

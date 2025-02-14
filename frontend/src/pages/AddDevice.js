@@ -12,7 +12,7 @@ const AddDevice = () => {
         systemId: "",
         pricePerHour: "",
         deviceType: "",
-        isAvailable: "true",
+        isAvailable: true,
         description: "",
     });
 
@@ -20,12 +20,14 @@ const AddDevice = () => {
         try{
             const addedDevice = await addDevice(submittedData);
             if(addedDevice){
-                console.log("Device Added: ", addedDevice);
+                // console.log("Device Added: ", addedDevice);
                 navigate('/device/view')
+            }else{
+                console.log(addedDevice);
             }
         }
         catch(error){
-            // console.log("Error: ", error.message);
+            console.log("Error: ", error.message);
             setError(error.message || "An unknown error occurred");
         }
 

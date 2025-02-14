@@ -12,11 +12,14 @@ export const addDevice = async (deviceData) => {
             body: JSON.stringify(deviceData),
         });
 
-        if(!response.ok)    throw new Error("Device adding failed: Status: ", await response.status);
+        if(!response.ok){
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Device adding failed.");
+        }
         return await response.json();
     }
     catch(error){
-        console.error("Error: ", error.message);
+        throw new Error(error.message);
     }
 }
 
@@ -33,11 +36,14 @@ export const updateDevice = async (deviceData) => {
             body: JSON.stringify(deviceData),
         });
 
-        if(!response.ok)    throw new Error("Update Device failed: Status: ", response.status);
+        if(!response.ok){
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Update Device failed: Status: ");
+        }
         return await response.json();
     }
     catch(error){
-        console.error("Error: ", error.message);
+        throw new Error(error.message);
     }
 }
 
@@ -52,11 +58,14 @@ export const deleteDevice = async (deviceData) => {
             },
         });
 
-        if(!response.ok)    throw new Error("Failed to Delete Device: Status: ", response.status);
+        if(!response.ok){
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to delete device");
+        }
         return await response.json();
     }
     catch(error){
-        console.error("Error: ", error.message);
+        throw new Error(error.message);
     }
 }
 
@@ -76,11 +85,14 @@ export const getDevice = async (filters = {}) => {
             }
         });
 
-        if(!response.ok)    throw new Error("Error Fetching Devices. Status: ", response.status);
+        if(!response.ok){
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Error Fetching Devices. Status: ");
+        }
 
         return await response.json();
     }
     catch(error){
-        console.error("Error: ", error.message);
+        throw new Error("Error: ", error.message);
     }
 }

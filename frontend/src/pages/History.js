@@ -60,6 +60,7 @@ const History = () => {
                 if (data) setBill(data);
             }
             catch(error){
+                console.log("Error: ",error);
                 setError(error.message || "An unknown error occurred");
             }
         }
