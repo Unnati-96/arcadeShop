@@ -24,11 +24,12 @@ const Billing = () => {
 
     const handleIssueDevice = async () => {
         try {
+            setError(null);
             const issue = await bookDevice(formData);
-            console.log("Device Issued: ", issue);
+            // console.log("Device Issued: ", issue);
 
             const bookingId = issue.BookingId;
-            console.log(" BID: ",bookingId)
+            // console.log(" BID: ",bookingId)
 
             setBill(prevState => ({
                 ...prevState,
@@ -36,7 +37,7 @@ const Billing = () => {
             }));
 
             const savedBill = await generateBill({ ...bill, bookingId });
-            console.log("Saved Bill: ", savedBill);
+            // console.log("Saved Bill: ", savedBill);
 
             setIsBilled(true);
         } catch (error) {

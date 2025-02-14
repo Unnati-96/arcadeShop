@@ -24,6 +24,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
+            setError(null);
             const loginData = await loginUser(formData);
             if (loginData) {
                 const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -31,11 +32,7 @@ const Login = () => {
                     setCurrentUser(storedUser);
                 }
                 setIsLoggedIn(true);
-                // if(currentUser['role'] === 'Guest'){
-                //     navigate('/no-access');
-                // }else {
-                    navigate('/device/view');
-                // }
+                navigate('/device/view');
             }
         } catch (error) {
             setError(error.message || "An unknown error occurred");
@@ -45,7 +42,7 @@ const Login = () => {
     // You can handle error display here if needed, but useEffect isn't necessary unless you want to trigger something else.
     useEffect(() => {
         if (error) {
-            console.log("Error occurred:", error);
+            // console.log("Error occurred:", error);
         }
     }, [error]);
 

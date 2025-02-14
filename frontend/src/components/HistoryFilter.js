@@ -31,10 +31,11 @@ const HistoryFilters = ({onFilteredHistory}) => {
     const handleApplyFilter = async (e) => {
         e.preventDefault();
         try{
+            setError(null);
             await onFilteredHistory(filterFormData);
         }
         catch(error){
-            console.log("Error : ", error)
+            // console.log("Error : ", error)
             setError(error.message);
         }
     };
@@ -100,10 +101,10 @@ const HistoryFilters = ({onFilteredHistory}) => {
                     <SubmitButton text="Apply" />
                 </div>
             </form>
-            
-            {/*    Error*/}
-            {error && <Error error={error} />}
         </div>
+        
+            {/*    Error*/}
+            {error && <div  ><span className='font-bold'>Messsage: </span>{error}</div>}
     </>
     )
 }

@@ -48,27 +48,27 @@ const IssueDevice = () => {
     const getDeviceList = async () => {
         try {
             const filters = {"isAvailable": true}
+            setError(null);
             const deviceList = await getDevice(filters);
             setDevice(deviceList);
             setAddUserModal(false);
         } catch (error) {
-            console.error("Error: ", error.message);
+            // console.error("Error: ", error.message);
+            setError(error.message || "An unknown error occurred");
         }
     };
 
     const handleUserDataSubmit = async (submittedData) => {
         try {
+            setError(null);
             const newuser = await addUser(submittedData);
-            console.log(newuser.data);
+            // console.log(newuser.data);
             let updateUser = [...user]
             updateUser.push(newuser.data);
             setUser(updateUser);
-
-            // let updatedUserId = [...userId]
-            // updatedUserId.push(submittedData._id)
-            // setUserId(updatedUserId);
         } catch (error) {
-            console.error("Error:", error.message);
+            // console.error("Error:", error.message);
+            setError(error.message || "An unknown error occurred")
         }
     };
 
@@ -128,7 +128,8 @@ const IssueDevice = () => {
                 ...formData,
                 users: [...user],
             };
-            console.log(updatedFormData.users);
+            // console.log(updatedFormData.users);
+            setError(null);
             const getBillData = generateBillData(updatedFormData);
 
             navigate("/inventory/billing", { state: { updatedFormData, getBillData } });
@@ -154,10 +155,6 @@ const IssueDevice = () => {
         let updatedUsers = user;
         updatedUsers = updatedUsers.filter((u) => u !== duser);
         setUser(updatedUsers);
-
-        // let updatedIds = updatedUsers.map(u => u._id);
-        // setUserId(updatedIds);
-        // console.log(user);
     };
 
     const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user')));
@@ -179,7 +176,7 @@ const IssueDevice = () => {
             <Heading title="Issue Device" />
             {/*<p>Current user testing: {currentUser}</p>*/}
             <form className="my-10 ml-32" onSubmit={handleSubmit}>
-                {/* Group Name & System ID */}
+                
                 <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
@@ -203,7 +200,7 @@ const IssueDevice = () => {
                         <select
                             name="systemId"
                             className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                            onChange={handleDeviceChange} // Handle the device selection change
+                            onChange={handleDeviceChange}
                             value={formData.systemId}
                             required
                         >
@@ -215,7 +212,7 @@ const IssueDevice = () => {
                     </div>
                 </div>
 
-                {/* Rate Input (based on selected device) */}
+                {/* Rate  */}
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
                         Rate (Per Hour)
@@ -223,9 +220,9 @@ const IssueDevice = () => {
                     <input
                         type="text"
                         name="rate"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                        className="w-full px-4 py-2 border bg-gray-100 border-gray-300 rounded-lg"
                         value={formData.rate}
-                        readOnly // Make the rate field read-only since it's populated from the device
+                        readOnly 
                     />
                 </div>
 

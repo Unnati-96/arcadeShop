@@ -18,9 +18,10 @@ const AddUser = () => {
 
     const handleSubmit = async (submittedData) => {
         try{
+            setError(null);
             const addedUser = await addUser(submittedData);
             if(addedUser){
-                console.log("Added user: ", addedUser);
+                // console.log("Added user: ", addedUser);
                 navigate('/user/view');
             }
         }catch(error){

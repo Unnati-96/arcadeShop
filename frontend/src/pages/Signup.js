@@ -22,8 +22,9 @@ const Signup = () => {
     const handleOnSubmit = async (e) => {
         e.preventDefault();
         try{
+            setError(null);
             const isFormSubmitted = await signupUser(formData);
-            console.log("Form Submitted")
+            // console.log("Form Submitted")
             navigate("/login");
         }catch(error){
             setError(error.message || "An unknown error occurred");

@@ -15,12 +15,13 @@ const ViewDevices = () => {
     useEffect( () => {
         const fetchUser = async () => {
             try {
-                    const data = await getUser();
-                    if (data) setUsers(data);
-                }
-                catch(error) {
-                    setError(error.message || "An unknown error occurred");
-                }
+                setError(null);
+                const data = await getUser();
+                if (data) setUsers(data);
+            }
+            catch(error) {
+                setError(error.message || "An unknown error occurred");
+            }
         }
 
 
@@ -38,13 +39,15 @@ const ViewDevices = () => {
 
     const handleDelete = async (userData) => {
         try {
+            setError(null);
             const deletedUser = await deleteUser(userData);
             if(deletedUser) {
-                console.log('Deleted user: ', deletedUser);
+                // console.log('Deleted user: ', deletedUser);
                 navigate('/user/view');
             }
         }catch(error){
-            console.error('Error: ', error.message);
+            // console.error('Error: ', error.message);
+            setError(error.message || 'An Unknown error occured.')
         }
     };
 

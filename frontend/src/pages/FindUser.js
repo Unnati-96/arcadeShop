@@ -22,6 +22,7 @@ const FindUser = ({ onClose, handleAddedUsers, selectdUsers }) => {
     const handleApplyFilter = async (e) => {
         e.preventDefault();
         // console.log(filterFormData);
+        setError(null);
         const filterdUserList = await getUser(filterFormData);
         setUsers(filterdUserList);
         // console.log("Filtered user List: ", filterdUserList);
@@ -67,7 +68,7 @@ const FindUser = ({ onClose, handleAddedUsers, selectdUsers }) => {
             setCurrentUser(JSON.parse(localStorage.getItem('user')));
         }
         onClose(selectedUsers);
-        console.log("Selected user: ", selectedUsers)
+        // console.log("Selected user: ", selectedUsers)
     }, [selectedUsers, error]);
 
     return (
