@@ -307,7 +307,17 @@ export const bookingHistory = async (req, res, next) => {
           if (filteredData.length === 0) {
               return next(errorHandler(404, "No bookings found for the specified user name"));
           }
-          return res.status(200).json(filteredData);
+          // return res.status(200).json(filteredData);
+          const responseData = filteredData.map((booking)=>{
+              const duration = booking.exitTime && booking.entryTime ? (new Date(booking.exitTime) - new Date(booking.entryTime)) /(1000 * 60) : 0;
+              const price = booking.price || 0;
+              const bookingDate = booking.entryTime ? new Date(booking.entryTime).toISOString() : null;
+              return {
+                ...booking.toObject(),
+                duration,price,bookingDate
+              }      
+          });
+         return res.status(200).json(responseData);
       }
       // If no filtering by user, proceed with the original data
       if (data.length === 0) {
@@ -322,6 +332,7 @@ export const bookingHistory = async (req, res, next) => {
           const price = booking.price || 0; // Default to 0 if not present
           // Assuming 'entryTime' is the booking date
           const bookingDate = booking.entryTime ? new Date(booking.entryTime).toISOString() : null;
+          // const date=new Date(booking.entryTime).toISOString();
           return {
               ...booking.toObject(), // Convert Mongoose document to plain object
               duration,  // Duration in minutes
