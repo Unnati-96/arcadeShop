@@ -21,8 +21,8 @@ const Login = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
+    const handleLogin = async (e) => { 
+        e.preventDefault(); 
         try {
             const loginData = await loginUser(formData);
             if (loginData) {
