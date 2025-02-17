@@ -2,17 +2,27 @@ import React, {useState} from "react";
 import ResetButton from "./ResetButton";
 import SubmitButton from "./SubmitButton";
 
-const DeviceForm = ({initialData, onSubmit, onReset, children}) => {
+const DeviceForm = ({initialData, onSubmit, onReset, children, disabledInput}) => {
     const [formData, setFormData] = useState(initialData);
 
     const handleChange = (e) => {
         const {value, name} = e.target;
-        setFormData({...formData, [name]: value});
+        if (!disabledInput.includes(name)) {
+            setFormData({
+                ...formData,
+                [name]: value,
+            });
+        }
     };
 
     const handleReset = () => {
         const resetData = Object.keys(initialData).reduce((acc, key) => {
-            acc[key] = "";
+            // Check if the field is not in disabledInput
+            if (!disabledInput.includes(key)) {
+                acc[key] = "";
+            } else {
+                acc[key] = formData[key];
+            }
             return acc;
         }, {});
         setFormData(resetData);
@@ -41,7 +51,9 @@ const DeviceForm = ({initialData, onSubmit, onReset, children}) => {
                     name="systemId"
                     value={formData.systemId}
                     onChange={handleChange}
-                    className="w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        disabledInput.includes("systemId") ? "bg-gray-200" : ""
+                    }`}
                     required
                     placeholder="S12-PS5"
                 />

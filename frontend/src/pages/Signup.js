@@ -22,8 +22,9 @@ const Signup = () => {
     const handleOnSubmit = async (e) => {
         e.preventDefault();
         try{
+            setError(null);
             const isFormSubmitted = await signupUser(formData);
-            console.log("Form Submitted")
+            // console.log("Form Submitted")
             navigate("/login");
         }catch(error){
             setError(error.message || "An unknown error occurred");
@@ -95,7 +96,7 @@ const Signup = () => {
                     </div>
 
                     {/* Role */}
-                    <div className="mb-5 flex items-center border border-gray-300 rounded-lg ">
+                    {/*<div className="mb-5 flex items-center border border-gray-300 rounded-lg ">
                         <label
                             htmlFor="role"
                             className="text-sm font-medium text-gray-700 w-1/3 px-4 py-2 border-r-2 border-gray-300 ">Role</label>
@@ -111,7 +112,7 @@ const Signup = () => {
                             <option value="GuestAdmin">Guest Admin</option>
                             <option value="Guest">Guest</option>
                         </select>
-                    </div>
+                    </div>*/}
 
                     {/* Password */}
                     <div className="mb-5">

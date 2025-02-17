@@ -13,10 +13,12 @@ const EditDevice = ({ data, onClose }) => {
 
     const handleEditDevice = async (updatedData) => {
         try{
+            setError(null);
             const editDevice = await updateDevice(updatedData);
-            console.log(updatedData)
+            // console.log(updatedData)
             if(editDevice){
-                console.log("Edited Device: ", editDevice);
+                onClose();
+                // console.log("Edited Device: ", editDevice);
                 navigate('/device/view');
             }
         }
@@ -38,7 +40,7 @@ const EditDevice = ({ data, onClose }) => {
         <EditModal onClose={onClose}>
             <Heading title="Edit Device Details" />
             {/*<p>Current user testing: {currentUser}</p>*/}
-            <DeviceForm initialData={data} onSubmit={handleEditDevice} onReset={false} >
+            <DeviceForm initialData={data} onSubmit={handleEditDevice} onReset={false} disabledInput={["systemId"]}>
                 <ResetButton text="Cancel" onReset={onClose} />
                 {error && <Error error={error} />}
             </DeviceForm>

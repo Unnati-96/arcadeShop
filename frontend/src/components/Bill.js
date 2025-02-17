@@ -1,14 +1,11 @@
 import React from "react";
 
 const Bill = ({ data }) => {
-    // console.log("DDDDaaatat:", data)
-    // const [error, setError] = useState(null);
     const todayDate = new Date().toLocaleDateString();
     const user = JSON.parse(localStorage.getItem('user'));
     const billedBy = user ? user.name : '';
 
-    // Fallback to empty array if data.users is undefined
-    const users = data?.users || [];  // Ensure users is always an array
+    const users = data?.users || []; 
 
     return (
         <div className="p-8 w-[40vw] max-w-4xl mx-auto flex flex-col justify-start items-center space-y-8">
@@ -71,7 +68,7 @@ const Bill = ({ data }) => {
             </div>
             <hr className="w-full border-gray-300" />
 
-            {/* Thanks Note */}
+            {/* Thanks */}
             <div className="w-full text-center mt-4">
                 <p className="text-gray-600">Thank you for your business!</p>
             </div>

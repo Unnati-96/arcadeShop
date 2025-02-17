@@ -17,6 +17,7 @@ const ViewDevices = () => {
     useEffect(() => {
         const fetchDevice = async () => {
             try{
+                setError(null);
                 const data = await getDevice();
                 if (data) setDevices(data);
             }
@@ -38,9 +39,10 @@ const ViewDevices = () => {
 
     const handleDelete = async (deviceData) => {
         try{
+            setError(null);
             const deletedDevice = await deleteDevice(deviceData);
             if(deletedDevice){
-                console.log(deletedDevice);
+                // console.log(deletedDevice);
                 navigate('/device/view');
             }
         }

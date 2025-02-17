@@ -22,6 +22,7 @@ const History = () => {
 
     const handleViewBill = async(billData) => {
         try{
+            setError(null);
             setBillModal(true);
             const billDetails = await getBills({bookingId: billData})
             setPreviewBill(billDetails[0]);
@@ -34,6 +35,7 @@ const History = () => {
 
     const handleFilteredHistory = async (filterFormData) => {
         // console.log("filterFormData: ", filterFormData)
+        setError(null);
         const filteredHistoryData = await getBookingHistory(filterFormData);
         if (filteredHistoryData)
             setBill(filteredHistoryData);
@@ -56,11 +58,12 @@ const History = () => {
     useEffect(() => {
         const fetchBookingHistory = async () => {
             try{
+                setError(null);
                 const data = await getBookingHistory();
                 if (data) setBill(data);
             }
             catch(error){
-                console.log("Error: ",error);
+                // console.log("Error: ",error);
                 setError(error.message || "An unknown error occurred");
             }
         }

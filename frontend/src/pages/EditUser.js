@@ -12,9 +12,11 @@ const EditUser = ({ data, onClose }) => {
     const [error, setError] = useState(null);
     const handleEditUser = async (updatedData) => {
         try{
+            setError(null);
             const editedUser = await editUser(updatedData);
             if (editedUser) {
-                console.log("User Edited: ", await editedUser);
+                onClose();
+                // console.log("User Edited: ", await editedUser);
                 navigate("/user/view");
             }
         }

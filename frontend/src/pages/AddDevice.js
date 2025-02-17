@@ -18,16 +18,15 @@ const AddDevice = () => {
 
     const handleSubmit = async (submittedData) => {
         try{
+            setError(null);
             const addedDevice = await addDevice(submittedData);
             if(addedDevice){
                 // console.log("Device Added: ", addedDevice);
                 navigate('/device/view')
-            }else{
-                console.log(addedDevice);
             }
         }
         catch(error){
-            console.log("Error: ", error.message);
+            // console.log("Error: ", error.message);
             setError(error.message || "An unknown error occurred");
         }
 
@@ -45,8 +44,7 @@ const AddDevice = () => {
     return (
         <div className="w-[80vw] p-6 bg-white rounded-lg flex flex-col">
             <Heading title="Add New Device" />
-            {/*<p>Current User testing: {currentUser}</p>*/}
-            <DeviceForm initialData={formData} onSubmit={handleSubmit} onReset={true}  />
+            <DeviceForm initialData={formData} onSubmit={handleSubmit} onReset={true} disabledInput={[]} />
             {error && <Error error={error} />}
         </div>
     );
