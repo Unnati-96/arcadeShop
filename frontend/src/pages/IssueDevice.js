@@ -11,6 +11,7 @@ import { getDevice } from "../services/deviceService";
 import { bookDevice } from "../services/bookingService";
 import { useNavigate, useLocation } from "react-router-dom";
 import Error from "../components/Error";
+import Toast from "../components/Toast";
 
 const IssueDevice = () => {
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ const IssueDevice = () => {
     const [device, setDevice] = useState([]);
     const [user, setUser] = useState([]);
     const [error, setError] = useState(null);
+    const [toast, setToast] = useState(null);
 
     const [userFormData, setUserFormData] = useState({
         name: "",
@@ -48,7 +50,7 @@ const IssueDevice = () => {
     const getDeviceList = async () => {
         try {
             const filters = {"isAvailable": true}
-            setError(null);
+            // setError(null);
             const deviceList = await getDevice(filters);
             setDevice(deviceList);
             setAddUserModal(false);
@@ -63,11 +65,16 @@ const IssueDevice = () => {
             setError(null);
             const newuser = await addUser(submittedData);
             // console.log(newuser.data);
-            let updateUser = [...user]
-            updateUser.push(newuser.data);
-            setUser(updateUser);
+            let updateUser;
+            if(newuser){
+                updateUser = [...user]
+                updateUser.push(newuser.data);
+                setUser(updateUser);
+                setToast("User Added.")
+            }
         } catch (error) {
             // console.error("Error:", error.message);
+            setToast("Failed to add user");
             setError(error.message || "An unknown error occurred")
         }
     };
@@ -129,7 +136,7 @@ const IssueDevice = () => {
                 users: [...user],
             };
             // console.log(updatedFormData.users);
-            setError(null);
+            // setError(null);
             const getBillData = generateBillData(updatedFormData);
 
             navigate("/inventory/billing", { state: { updatedFormData, getBillData } });
@@ -288,7 +295,6 @@ const IssueDevice = () => {
                     <SubmitButton text="Proceed"/>
                 </div>
             </form>
-
             {/* Modal */}
             {addUserModal && (
                 <>
@@ -297,8 +303,8 @@ const IssueDevice = () => {
                         <Heading title="Add User Details" />
                         <AddUserForm initialData={userFormData} onSubmit={handleUserDataSubmit} disabledInput={["role"]}>
                             <ResetButton text="Cancel" onReset={() => setAddUserModal(false)} />
-                            {error && <Error error={error} />}
                         </AddUserForm>
+                            {error && <Error error={error} />}
                     </EditModal>
                 </>
             )}
@@ -313,6 +319,8 @@ const IssueDevice = () => {
                     </EditModal>
                 </>
             )}
+            
+            {toast && <Toast message={toast} />}
         </div>
     );
 };

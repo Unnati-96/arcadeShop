@@ -8,7 +8,7 @@ const HistoryFilters = ({onFilteredHistory}) => {
     const [error, setError] = useState(null);
 
     const [filterFormData, setFilterFormData] = useState({
-        users: "",
+        groupName: "",
         date: "",
         systemId:""
     });
@@ -52,16 +52,16 @@ const HistoryFilters = ({onFilteredHistory}) => {
                 className="space-x-4 flex justify-evenly items-center w-full">
                 <div>
                     <label
-                        htmlFor="users"
-                        className="block text-sm font-medium text-gray-700 mb-1 text-left">Name</label>
+                        htmlFor="groupName"
+                        className="block text-sm font-medium text-gray-700 mb-1 text-left">Group Name</label>
                     <input
                         type="text"
-                        name="users"
-                        id="users"
+                        name="groupName"
+                        id="groupName"
                         onChange={handleOnChange}
-                        value={filterFormData.users}
+                        value={filterFormData.groupName}
                         className="w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                        placeholder="John Deo"
+                        placeholder="Eg.Rangers"
                     />
                 </div>
 

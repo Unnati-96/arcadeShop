@@ -6,6 +6,7 @@ import ResetButton from "../components/ResetButton";
 import { bookDevice } from "../services/bookingService";
 import {generateBill} from "../services/billingService";
 import Error from "../components/Error";
+import Toast from "../components/Toast";
 
 const Billing = () => {
     const location = useLocation();
@@ -16,6 +17,7 @@ const Billing = () => {
     const formData = location.state?.updatedFormData;
     const billData = location.state?.getBillData;
     const [bill, setBill] = useState(billData);
+    const [toast, setToast] = useState(null);
 
     const handleBack = () => {
         navigate("/inventory/issue-device", { state: { formData, bill } });
@@ -38,10 +40,12 @@ const Billing = () => {
 
             const savedBill = await generateBill({ ...bill, bookingId });
             // console.log("Saved Bill: ", savedBill);
+            setToast("Device Issued Successfully.")
 
             setIsBilled(true);
         } catch (error) {
             // console.error("Error: ", error.message);
+            setToast("Failed to Issue Device.")
             setError(error.message || "An unknown error occurred");
         }
     };
@@ -64,7 +68,7 @@ const Billing = () => {
 
     useEffect(() => {
         // console.log(bill);
-    }, [bill, error]);
+    }, [bill, error, toast]);
 
     return (
         <div className="w-[60vw] p-6 print">
@@ -93,6 +97,7 @@ const Billing = () => {
                         </div>
                     )}
                 {error && <Error error={error} />}
+                {toast && <Toast message={toast} />}
             </div>
         </div>
     );

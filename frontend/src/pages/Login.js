@@ -32,7 +32,11 @@ const Login = () => {
                     setCurrentUser(storedUser);
                 }
                 setIsLoggedIn(true);
-                navigate('/device/view');
+                if(storedUser['role'] === 'Guest'){
+                    navigate('/no-access');
+                }else{
+                    navigate('/device/view');
+                }
             }
         } catch (error) {
             setError(error.message || "An unknown error occurred");

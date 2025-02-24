@@ -4,10 +4,14 @@ import DeviceForm from "../components/DeviceForm";
 import {addDevice} from "../services/deviceService";
 import {useNavigate} from "react-router-dom";
 import Error from "../components/Error";
+import Toast from "../components/Toast";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddDevice = () => {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
+    const [toast, setToast]= useState(null);
     const [formData, setFormData] = useState({
         systemId: "",
         pricePerHour: "",
@@ -21,16 +25,15 @@ const AddDevice = () => {
             setError(null);
             const addedDevice = await addDevice(submittedData);
             if(addedDevice){
-                // console.log("Device Added: ", addedDevice);
-                navigate('/device/view')
+                setToast("Device Added Successfully.");
+                // toast.success('Device added successfully!');
             }
         }
         catch(error){
-            // console.log("Error: ", error.message);
             setError(error.message || "An unknown error occurred");
+            // toast.error('Failed to add device!');
+            setToast("Failed to add device.");
         }
-
-        console.log("Form submitted with data:", submittedData);
     };
 
     const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user')));
@@ -46,6 +49,8 @@ const AddDevice = () => {
             <Heading title="Add New Device" />
             <DeviceForm initialData={formData} onSubmit={handleSubmit} onReset={true} disabledInput={[]} />
             {error && <Error error={error} />}
+            {toast && <Toast message={toast} />}
+            {/* <ToastContainer /> */}
         </div>
     );
 };

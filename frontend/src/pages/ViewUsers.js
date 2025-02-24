@@ -5,10 +5,13 @@ import Heading from "../components/Heading";
 import EditUser from "./EditUser";
 import {useNavigate} from "react-router-dom";
 import {deleteUser, getUser } from "../services/userService";
+import Error from "../components/Error";
+import Toast from "../components/Toast";
 
 const ViewDevices = () => {
     const [users, setUsers] = useState([]);
     const [error, setError] = useState(null);
+    const [toast, setToast]= useState(null);
     const navigate = useNavigate();
 
     const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user')))
@@ -32,7 +35,7 @@ const ViewDevices = () => {
 
 
         fetchUser();
-    }, [error]);
+    }, [error, toast]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState({});
@@ -43,11 +46,13 @@ const ViewDevices = () => {
             const deletedUser = await deleteUser(userData);
             if(deletedUser) {
                 // console.log('Deleted user: ', deletedUser);
-                navigate('/user/view');
+                // navigate('/user/view');
+                setToast("User Deleted Successsfully")
             }
         }catch(error){
             // console.error('Error: ', error.message);
             setError(error.message || 'An Unknown error occured.')
+            setToast("Failed to delete user.")
         }
     };
 
@@ -61,12 +66,16 @@ const ViewDevices = () => {
         setIsModalOpen(false);
         setSelectedUser({});
     };
+    const handleToast = (msg) => {
+        setToast(msg);
+    }
 
     return (
         <div className="w-full p-6 bg-white rounded-lg flex flex-col">
             <Heading title="View Users List" />
             {/*<p>Current user Tsting: {currentUser}</p>*/}
-
+            {error && <Error error={error} />}
+            {toast && <Toast message={toast} />}
             {/*Table*/}
             <div className="flex items-center justify-center mx-auto">
                 <table className="border border-collapse w-full">
@@ -105,7 +114,7 @@ const ViewDevices = () => {
                 <>
                     {/* Overlay background to disable background interaction */}
                     <div className="fixed inset-0 bg-gray-800 opacity-50 z-50"></div>
-                    <EditUser data={selectedUser} onClose={handleCloseModal} />
+                    <EditUser data={selectedUser} onClose={handleCloseModal} toast={handleToast} />
 
                 </>
             )}

@@ -4,8 +4,9 @@ const Bill = ({ data }) => {
     const todayDate = new Date().toLocaleDateString();
     const user = JSON.parse(localStorage.getItem('user'));
     const billedBy = user ? user.name : '';
-
     const users = data?.users || []; 
+    const price = (data.rate * data.duration * users.length);
+    // console.log(data);
 
     return (
         <div className="p-8 w-[40vw] max-w-4xl mx-auto flex flex-col justify-start items-center space-y-8">
@@ -53,8 +54,8 @@ const Bill = ({ data }) => {
                             <td className="py-3 px-5 text-sm">{u.name}</td>
                             <td className="py-3 px-5 text-sm">{u.email}</td>
                             <td className="py-3 px-5 text-sm">₹{data.rate}/h</td>
-                            <td className="py-3 px-5 text-sm">{data.duration} hrs</td>
-                            <td className="py-3 px-5 text-sm">₹ {data.rate * data.duration}</td>
+                            <td className="py-3 px-5 text-sm">{data.duration.toFixed(2)} hrs</td>
+                            <td className="py-3 px-5 text-sm">₹ {(data.rate * data.duration).toFixed(2)}</td>
                         </tr>
                     ))}
                     </tbody>
@@ -64,7 +65,7 @@ const Bill = ({ data }) => {
             {/* Total Section */}
             <div className="w-full flex justify-between items-center">
                 <p className="font-semibold">Total: </p>
-                <p className="font-semibold text-lg">₹ {data.price}</p>
+                <p className="font-semibold text-lg">₹ {price}</p>
             </div>
             <hr className="w-full border-gray-300" />
 

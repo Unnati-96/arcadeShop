@@ -4,10 +4,14 @@ import AddUserForm from "../components/AddUserForm";
 import {addUser} from "../services/userService";
 import {useNavigate} from "react-router-dom";
 import Error from "../components/Error";
+import Toast from "../components/Toast";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddUser = () => {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
+    const [toast, setToast]= useState(null);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -21,12 +25,15 @@ const AddUser = () => {
             setError(null);
             const addedUser = await addUser(submittedData);
             if(addedUser){
-                // console.log("Added user: ", addedUser);
-                navigate('/user/view');
+                // navigate('/user/view');
+                setToast("User Added Successfully.");
+                // toast.success('Device added successfully!');
             }
         }catch(error){
             // console.error("Form Submission Failed");
-            setError(error.message || "An Unknown error occured.")
+            setError(error.message || "An Unknown error occured.")            
+            // toast.error('Failed to add device!');
+            setToast("Failed to add user.");
         }
     };
 
@@ -43,6 +50,8 @@ const AddUser = () => {
             <Heading title="Add User"/>
             <AddUserForm initialData={formData} onSubmit={handleSubmit} onReset={true} disabledInput={[]} />
             {error && <Error error={error}/>}
+            
+            {toast && <Toast message={toast} />}
         </div>
     );
 };

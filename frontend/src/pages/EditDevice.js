@@ -7,7 +7,7 @@ import {useNavigate} from "react-router-dom";
 import {updateDevice} from "../services/deviceService";
 import Error from "../components/Error";
 
-const EditDevice = ({ data, onClose }) => {
+const EditDevice = ({ data, onClose, toast }) => {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
 
@@ -19,11 +19,13 @@ const EditDevice = ({ data, onClose }) => {
             if(editDevice){
                 onClose();
                 // console.log("Edited Device: ", editDevice);
-                navigate('/device/view');
+                // navigate('/device/view');
+                toast("Device Edited Successfully!")
             }
         }
         catch(error){
             // console.error("Error: ", error.message);
+            toast("Failed to edit device");
             setError(error.message || "An unknown error occurred");
         }
     };
@@ -34,7 +36,7 @@ const EditDevice = ({ data, onClose }) => {
         if (storedUser) {
             setCurrentUser(JSON.parse(localStorage.getItem('user')));
         }
-    }, [error]);
+    }, [error, toast]);
 
     return (
         <EditModal onClose={onClose}>

@@ -7,10 +7,14 @@ import {useNavigate} from "react-router-dom";
 import {deleteDevice, getDevice} from "../services/deviceService";
 import {ArcadeContext} from "../context/ArcadeContext";
 import Error from "../components/Error";
+import Toast from "../components/Toast";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ViewDevices = () => {
     const [devices, setDevices] = useState([]);
     const navigate = useNavigate();
+    const [toast, setToast]= useState(null);
     const [error, setError] = useState(null);
     const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user')));
 
@@ -32,7 +36,7 @@ const ViewDevices = () => {
             setCurrentUser(JSON.parse(localStorage.getItem('user')));
         }
         fetchDevice();
-    }, [error]);
+    }, [error, toast]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDevice, setSelectedDevice] = useState({});
@@ -43,12 +47,14 @@ const ViewDevices = () => {
             const deletedDevice = await deleteDevice(deviceData);
             if(deletedDevice){
                 // console.log(deletedDevice);
-                navigate('/device/view');
+                // navigate('/device/view');
+                setToast("Device deleted Successsfully.")
             }
         }
         catch(error){
             // console.error('Error: ', error.message);
             setError(error.message || "An unknown error occurred");
+            setToast("Failed to delete Device.")
         }
     };
 
@@ -62,6 +68,9 @@ const ViewDevices = () => {
         setIsModalOpen(false);
         setSelectedDevice({});
     };
+    const handleToast = (msg) => {
+        setToast(msg);
+    }
 
     return (
         <div className="w-full p-6 bg-white rounded-lg flex flex-col">
@@ -69,6 +78,7 @@ const ViewDevices = () => {
             {/*<p>Current use Testing: {currentUser.name}</p>*/}
 
             {error && <Error error={error} />}
+            {toast && <Toast message={toast} />}
 
             {/* Table */}
             <div className="flex items-center justify-center mx-auto">
@@ -119,7 +129,7 @@ const ViewDevices = () => {
                 <>
                     {/* Overlay background to disable background interaction */}
                     <div className="fixed inset-0 bg-gray-800 opacity-50 z-50"></div>
-                    <EditDevice data={selectedDevice} onClose={handleCloseModal} />
+                    <EditDevice data={selectedDevice} onClose={handleCloseModal} toast={handleToast} />
 
                 </>
             )}

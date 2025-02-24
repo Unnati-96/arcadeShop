@@ -7,7 +7,7 @@ import {useNavigate} from "react-router-dom";
 import {editUser} from "../services/userService";
 import Error from "../components/Error";
 
-const EditUser = ({ data, onClose }) => {
+const EditUser = ({ data, onClose, toast }) => {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
     const handleEditUser = async (updatedData) => {
@@ -17,12 +17,14 @@ const EditUser = ({ data, onClose }) => {
             if (editedUser) {
                 onClose();
                 // console.log("User Edited: ", await editedUser);
-                navigate("/user/view");
+                // navigate("/user/view");
+                toast("User Edited Successfully!")
             }
         }
         catch(error){
             // console.error("Error: ", error.message);
             setError(error.message || "An unknown error occurred");
+            toast("Failed to edit user");
         }
 
     };
@@ -33,7 +35,7 @@ const EditUser = ({ data, onClose }) => {
         if (storedUser) {
             setCurrentUser(JSON.parse(localStorage.getItem('user')));
         }
-    }, [error]);
+    }, [error, toast]);
 
     return (
         <EditModal onClose={onClose}>
