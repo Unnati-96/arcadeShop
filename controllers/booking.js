@@ -265,7 +265,7 @@ export const createBooking = async (req, res, next) => {
 };
 export const bookingHistory = async (req, res, next) => {
   // console.log("History hitting")
-  const { systemId, users, date } = req.query;
+  const { systemId, users, date,groupName } = req.query;
   try {
       let filter = {};
       if (systemId && systemId.trim() !== "") {
@@ -282,6 +282,11 @@ export const bookingHistory = async (req, res, next) => {
       //         next(errorHandler(400, "Invalid Id format!!"));
       //     }
       // }
+
+      if(groupName && groupName.trim() !== "")
+      {
+        filter.groupName=groupName;
+      }
       // If date is provided, calculate the start and end of the day in UTC
       if (date && date.trim() !== "") {
           const searchDate = new Date(date);
@@ -329,8 +334,8 @@ export const bookingHistory = async (req, res, next) => {
           const duration = booking.exitTime && booking.entryTime ?
               (new Date(booking.exitTime) - new Date(booking.entryTime)) / (1000 * 60) : 0;
           // Assuming 'price' is a field in your booking model
-          const price = booking.price || 0; // Default to 0 if not present
-          // Assuming 'entryTime' is the booking date
+          const price = booking.price || 0; 
+          
           const bookingDate = booking.entryTime ? new Date(booking.entryTime).toISOString() : null;
           // const date=new Date(booking.entryTime).toISOString();
           return {
