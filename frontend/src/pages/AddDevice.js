@@ -23,6 +23,7 @@ const AddDevice = () => {
     const handleSubmit = async (submittedData) => {
         try{
             setError(null);
+            setToast(null)
             const addedDevice = await addDevice(submittedData);
             if(addedDevice){
                 setToast("Device Added Successfully.");
@@ -42,7 +43,7 @@ const AddDevice = () => {
         if (storedUser) {
             setCurrentUser(JSON.parse(localStorage.getItem('user')));
         }
-    }, [error]);
+    }, [error, toast]);
 
     return (
         <div className="w-[80vw] p-6 bg-white rounded-lg flex flex-col">

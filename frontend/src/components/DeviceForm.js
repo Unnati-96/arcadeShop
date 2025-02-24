@@ -19,7 +19,12 @@ const DeviceForm = ({initialData, onSubmit, onReset, children, disabledInput}) =
         const resetData = Object.keys(initialData).reduce((acc, key) => {
             // Check if the field is not in disabledInput
             if (!disabledInput.includes(key)) {
-                acc[key] = "";
+                // acc[key] = "";
+                if (key === "isAvailable") {
+                    acc[key] = true;
+                } else {
+                    acc[key] = "";
+                }
             } else {
                 acc[key] = formData[key];
             }
